@@ -18,13 +18,16 @@ import {
   AlignCenter,
   AlignLeft,
   AlignRight,
-  Maximize2,
   Minimize2,
+  Maximize2,
+  MoveHorizontal,
+  Expand,
   Type,
 } from "lucide-react";
 import { FontSizeType, TextALignType } from "@/lib/validation/text-schema";
 import { OpacityFormField } from "@/components/forms/fields/opacity-form-field";
 import { ImageSourceFormField } from "@/components/forms/fields/image-source-form-field";
+import { SliderInputField } from "@/components/forms/fields/slider-input-field";
 import { ObjectFitType } from "@/lib/validation/image-schema";
 import { ElementType } from "@/lib/validation/element-type";
 import {
@@ -50,6 +53,8 @@ const textAlignMap: Record<TextALignType, React.ReactElement> = {
 const objectFitMap: Record<ObjectFitType, React.ReactElement> = {
   [ObjectFitType.enum.Contain]: <Minimize2 className="h-4 w-4" />,
   [ObjectFitType.enum.Cover]: <Maximize2 className="h-4 w-4" />,
+  [ObjectFitType.enum.Expand]: <MoveHorizontal className="h-4 w-4" />,
+  [ObjectFitType.enum.Fill]: <Expand className="h-4 w-4" />,
 };
 
 export function StyleMenu({
@@ -104,13 +109,46 @@ export function StyleMenu({
             itemClassName="h-10 w-10"
           />
         ) : null}
+        {style && Object.hasOwn(style, "lineHeight") ? (
+          <SliderInputField
+            fieldName={`${stylePath}.lineHeight`}
+            form={form}
+            label="Line Height"
+            min={0.5}
+            max={4}
+            step={0.1}
+            className="w-full"
+          />
+        ) : null}
+        {style && Object.hasOwn(style, "letterSpacing") ? (
+          <SliderInputField
+            fieldName={`${stylePath}.letterSpacing`}
+            form={form}
+            label="Letter Spacing"
+            min={-0.1}
+            max={0.5}
+            step={0.01}
+            className="w-full"
+          />
+        ) : null}
+        {style && Object.hasOwn(style, "paragraphSpacing") ? (
+          <SliderInputField
+            fieldName={`${stylePath}.paragraphSpacing`}
+            form={form}
+            label="Bottom Spacing"
+            min={0}
+            max={3}
+            step={0.1}
+            className="w-full"
+          />
+        ) : null}
         {style && Object.hasOwn(style, "objectFit") ? (
           <EnumRadioGroupField
             name={"Object Fit"}
             form={form}
             fieldName={`${stylePath}.objectFit` as ImageStyleObjectFitFieldPath}
             enumValueElements={objectFitMap}
-            groupClassName="grid grid-cols-3  gap-1"
+            groupClassName="grid grid-cols-4 gap-1"
             itemClassName="h-10 w-10"
           />
         ) : null}

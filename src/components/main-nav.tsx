@@ -1,32 +1,33 @@
 import * as React from "react";
 import Link from "next/link";
-import { useSelectedLayoutSegment } from "next/navigation";
 
 import { cn } from "@/lib/utils";
 import { Icons } from "@/components/icons";
-import { Button, buttonVariants } from "./ui/button";
-import { EditorMenubar } from "./editor-menubar";
-import { Download, Loader2Icon, Settings } from "lucide-react";
+import { Button } from "./ui/button";
+import { Download, FileImage, FileText, Loader2Icon } from "lucide-react";
 import Pager from "./pager";
 import { FilenameForm } from "./forms/filename-form";
-import { BringYourKeysDialog } from "@/components/api-keys-dialog";
-import { StarOnGithub } from "@/components/star-on-github";
-
-export type NavItem = {
-  title: string;
-  href: string;
-  disabled?: boolean;
-};
-
-export type MainNavItem = NavItem;
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { ExportMode } from "@/lib/hooks/use-component-printer";
 
 interface MainNavProps {
-  handlePrint: () => void;
+  handlePrint: (mode: ExportMode) => void;
   isPrinting: boolean;
   className?: string;
 }
 
 export function MainNav({ handlePrint, isPrinting, className }: MainNavProps) {
+  const [open, setOpen] = React.useState(false);
+
+  const handleExport = (mode: ExportMode) => {
+    setOpen(false);
+    handlePrint(mode);
+  };
+
   return (
     <div
       className={cn(
@@ -41,7 +42,6 @@ export function MainNav({ handlePrint, isPrinting, className }: MainNavProps) {
             Carousel Generator
           </span>
         </Link>
-        <EditorMenubar />
       </div>
       <div className="hidden lg:block">
         <Pager />
@@ -50,44 +50,37 @@ export function MainNav({ handlePrint, isPrinting, className }: MainNavProps) {
         <div className="hidden md:block">
           <FilenameForm />
         </div>
-        <Button variant="ghost" size={"icon"} onClick={handlePrint}>
-          <div className="flex flex-row gap-1 items-center">
-            {isPrinting ? (
-              <Loader2Icon className="w-4 h-4 animate-spin" />
-            ) : (
-              <Download />
-            )}
-          </div>
-        </Button>
-        <StarOnGithub />
-        <Link
-          className="block lg:hidden"
-          href={"https://github.com/FranciscoMoretti/carousel-generator"}
-          target="_blank"
-          rel="noreferrer"
-        >
-          <div
-            className={cn(
-              buttonVariants({
-                variant: "ghost",
-              }),
-              "w-9 px-0"
-            )}
-          >
-            <Icons.gitHub className="h-5 w-5" />
-            <span className="sr-only">GitHub</span>
-          </div>
-        </Link>
-        {/* // TODO: Re-enable your own keys system  */}
-        {/* <BringYourKeysDialog
-          triggerButton={
-            <Button variant="ghost" size={"icon"}>
-              <div className="flex flex-row gap-1 items-center">
-                <Settings />
-              </div>
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size={"icon"} disabled={isPrinting}>
+              {isPrinting ? (
+                <Loader2Icon className="w-4 h-4 animate-spin" />
+              ) : (
+                <Download />
+              )}
             </Button>
-          }
-        /> */}
+          </PopoverTrigger>
+          <PopoverContent className="w-48 p-2" align="end">
+            <div className="flex flex-col gap-1">
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-2"
+                onClick={() => handleExport("pdf")}
+              >
+                <FileText className="h-4 w-4" />
+                PDF
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-2"
+                onClick={() => handleExport("images")}
+              >
+                <FileImage className="h-4 w-4" />
+                Images (ZIP)
+              </Button>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
     </div>
   );

@@ -9,7 +9,7 @@ const ImageDataUrlSchema = z
 
 // TODO: Make more granular defaults in all schemas
 
-export const ObjectFitType = z.enum(["Cover", "Contain"]);
+export const ObjectFitType = z.enum(["Contain", "Cover", "Expand", "Fill"]);
 export type ObjectFitType = z.infer<typeof ObjectFitType>;
 
 export const ImageStyleSchema = z.object({

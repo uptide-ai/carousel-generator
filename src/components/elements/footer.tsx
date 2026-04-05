@@ -13,15 +13,20 @@ const Footer = React.forwardRef<
     className?: string;
   }
 >(function Footer({ config, number, className }, ref) {
+  const showBrand = config.brand.showBrand;
+  const showNumbers = config.pageNumber.showNumbers;
+
+  if (!showBrand && !showNumbers) {
+    return <div ref={ref} />;
+  }
+
   return (
     <div
       ref={ref}
       className={cn("flex flex-row justify-between items-center", className)}
     >
-      <Signature config={config} />
-      {config.pageNumber.showNumbers && (
-        <PageNumber config={config} number={number} />
-      )}
+      {showBrand ? <Signature config={config} /> : <div />}
+      {showNumbers && <PageNumber config={config} number={number} />}
     </div>
   );
 });

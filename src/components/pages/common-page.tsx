@@ -20,9 +20,10 @@ import { PageFrame } from "@/components/pages/page-frame";
 import { PageLayout } from "@/components/pages/page-layout";
 import { AddElement } from "@/components/pages/add-element";
 import { ElementType } from "@/lib/validation/element-type";
-import { ContentImage } from "@/components/elements/content-image";
+import { ContentImage, ContentImageFillLayer } from "@/components/elements/content-image";
 import ElementMenubarWrapper from "@/components/element-menubar-wrapper";
 import { useElementSize } from "usehooks-ts";
+import { ObjectFitType, ContentImageSchema } from "@/lib/validation/image-schema";
 
 export function CommonPage({
   index,
@@ -65,17 +66,42 @@ export function CommonPage({
     ? size.height - FRAME_PADDING * 2 - footerDimensions.height - elementsHeight
     : 0;
 
+  const firstElement = slide.elements[0];
+  const lastElement = slide.elements[slide.elements.length - 1];
+  const firstIsExpand =
+    firstElement?.type === ElementType.enum.ContentImage &&
+    (firstElement as z.infer<typeof ContentImageSchema>).style.objectFit === ObjectFitType.enum.Expand;
+  const lastIsExpand =
+    lastElement?.type === ElementType.enum.ContentImage &&
+    (lastElement as z.infer<typeof ContentImageSchema>).style.objectFit === ObjectFitType.enum.Expand;
+
   return (
     <PageBase size={size} fieldName={backgroundImageField}>
       <BackgroundLayer background={config.theme.background} className="-z-20" />
       {slide.backgroundImage?.source.src ? (
         <BackgroundImageLayer image={slide.backgroundImage} className="-z-10" />
       ) : null}
+      {slide.elements.map((element, idx) =>
+        element.type == ElementType.enum.ContentImage ? (
+          <ContentImageFillLayer
+            key={`fill-${idx}`}
+            fieldName={`${fieldName}.elements.${idx}` as ElementFieldPath}
+          />
+        ) : null
+      )}
       <PageFrame
         fieldName={backgroundImageField}
-        className={cn("p-10", className)}
+        className={cn(
+          firstIsExpand ? "pt-0" : "pt-10",
+          lastIsExpand ? "pb-0" : "pb-10",
+          "px-10",
+          className
+        )}
       >
-        <PageLayout fieldName={backgroundImageField} className={"gap-2"}>
+        <PageLayout
+          fieldName={backgroundImageField}
+          className={cn("gap-2", firstIsExpand && "justify-start")}
+        >
           {slide.elements.map((element, index) => {
             const currentField = (fieldName +
               ".elements." +
@@ -117,10 +143,22 @@ export function CommonPage({
                 ref={(el) => {
                   el ? (inputRefs.current[index] = el) : null;
                 }}
+                style={
+                  element.style.objectFit === ObjectFitType.enum.Expand
+                    ? {
+                        marginLeft: "-40px",
+                        marginRight: "-40px",
+                        width: "calc(100% + 80px)",
+                        marginBottom: "12px",
+                      }
+                    : undefined
+                }
               >
                 <ContentImage
                   fieldName={currentField as ElementFieldPath}
                   className="h-40"
+                  isFirst={index === 0}
+                  isLast={index === slide.elements.length - 1}
                 />
               </ElementMenubarWrapper>
             ) : null;

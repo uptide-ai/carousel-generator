@@ -17,8 +17,8 @@ export const defaultValues = {
   slides: defaultSlideValues,
   config: {
     brand: {
+      showBrand: true,
       avatar: DEFAULT_IMAGE_INPUT,
-
       name: "My name",
       handle: "@name",
     },

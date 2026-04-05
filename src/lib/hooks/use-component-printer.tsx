@@ -7,8 +7,7 @@ import { DocumentFormReturn } from "@/lib/document-form-types";
 import { toCanvas } from "html-to-image";
 import { Options as HtmlToImageOptions } from "html-to-image/lib/types";
 import { jsPDF, jsPDFOptions } from "jspdf";
-
-// TODO: Create a reusable component and package with this code
+import JSZip from "jszip";
 
 type HtmlToPdfOptions = {
   margin: [number, number, number, number];
@@ -24,11 +23,9 @@ export const toPx = function toPx(val: number, k: number) {
 };
 
 function getPdfPageSize(opt: HtmlToPdfOptions) {
-  // Retrieve page-size based on jsPDF settings, if not explicitly provided.
   // @ts-ignore function not explicitly exported
   const pageSize = jsPDF.getPageSize(opt.jsPDF);
 
-  // Add 'inner' field if not present.
   if (!pageSize.hasOwnProperty("inner")) {
     pageSize.inner = {
       width: pageSize.width - opt.margin[1] - opt.margin[3],
@@ -41,22 +38,17 @@ function getPdfPageSize(opt: HtmlToPdfOptions) {
     pageSize.inner.ratio = pageSize.inner.height / pageSize.inner.width;
   }
 
-  // Attach pageSize to this.
   return pageSize;
 }
 
 function canvasToPdf(canvas: HTMLCanvasElement, opt: HtmlToPdfOptions) {
   const pdfPageSize = getPdfPageSize(opt);
 
-  // Calculate the number of pages.
   var pxFullHeight = canvas.height;
   var pxPageHeight = Math.floor(canvas.width * pdfPageSize.inner.ratio);
   var nPages = Math.ceil(pxFullHeight / pxPageHeight);
-
-  // Define pageHeight separately so it can be trimmed on the final page.
   var pageHeight = pdfPageSize.inner.height;
 
-  // Create a one-page canvas to split up the full image.
   var pageCanvas = document.createElement("canvas");
   var pageCtx = pageCanvas.getContext("2d");
   if (!pageCtx) {
@@ -65,18 +57,15 @@ function canvasToPdf(canvas: HTMLCanvasElement, opt: HtmlToPdfOptions) {
   pageCanvas.width = canvas.width;
   pageCanvas.height = pxPageHeight;
 
-  // Initialize the PDF.
   const pdf = new jsPDF(opt.jsPDF);
 
   for (var page = 0; page < nPages; page++) {
-    // Trim the final page to reduce file size.
     if (page === nPages - 1 && pxFullHeight % pxPageHeight !== 0) {
       pageCanvas.height = pxFullHeight % pxPageHeight;
       pageHeight =
         (pageCanvas.height * pdfPageSize.inner.width) / pageCanvas.width;
     }
 
-    // Display the page.
     var w = pageCanvas.width;
     var h = pageCanvas.height;
 
@@ -84,7 +73,6 @@ function canvasToPdf(canvas: HTMLCanvasElement, opt: HtmlToPdfOptions) {
     pageCtx.fillRect(0, 0, w, h);
     pageCtx.drawImage(canvas, 0, page * pxPageHeight, w, h, 0, 0, w, h);
 
-    // Add the page to the PDF.
     if (page) pdf.addPage();
     var imgData = pageCanvas.toDataURL(
       "image/" + opt.image.type,
@@ -102,18 +90,60 @@ function canvasToPdf(canvas: HTMLCanvasElement, opt: HtmlToPdfOptions) {
   return pdf;
 }
 
+function canvasToImages(
+  canvas: HTMLCanvasElement,
+  numPages: number,
+  quality: number
+): string[] {
+  const pxPageHeight = Math.floor(canvas.height / numPages);
+  const images: string[] = [];
+
+  for (let page = 0; page < numPages; page++) {
+    const pageCanvas = document.createElement("canvas");
+    const pageCtx = pageCanvas.getContext("2d");
+    if (!pageCtx) throw Error("Canvas context not found");
+
+    pageCanvas.width = canvas.width;
+    pageCanvas.height = pxPageHeight;
+
+    pageCtx.fillStyle = "white";
+    pageCtx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+    pageCtx.drawImage(
+      canvas,
+      0,
+      page * pxPageHeight,
+      canvas.width,
+      pxPageHeight,
+      0,
+      0,
+      canvas.width,
+      pxPageHeight
+    );
+
+    images.push(pageCanvas.toDataURL("image/png", quality));
+  }
+
+  return images;
+}
+
+function dataUrlToBlob(dataUrl: string): Blob {
+  const parts = dataUrl.split(",");
+  const mime = parts[0].match(/:(.*?);/)![1];
+  const bstr = atob(parts[1]);
+  const u8arr = new Uint8Array(bstr.length);
+  for (let i = 0; i < bstr.length; i++) u8arr[i] = bstr.charCodeAt(i);
+  return new Blob([u8arr], { type: mime });
+}
+
+export type ExportMode = "pdf" | "images";
+
 export function useComponentPrinter() {
   const { numPages } = useFieldArrayValues("slides");
   const { watch }: DocumentFormReturn = useFormContext();
 
   const [isPrinting, setIsPrinting] = React.useState(false);
-  // TODO: Show animation on loading
   const componentRef = React.useRef(null);
-
-  // Packages and references
-  // react-to-print: https://github.com/gregnb/react-to-print
-  // html-to-image: https://github.com/bubkoo/html-to-image
-  // jsPDF: https://rawgit.com/MrRio/jsPDF/master/docs/jsPDF.html
+  const exportModeRef = React.useRef<ExportMode>("pdf");
 
   const reactToPrintContent = React.useCallback(() => {
     const current = componentRef.current;
@@ -121,7 +151,6 @@ export function useComponentPrinter() {
     if (current && typeof current === "object") {
       // @ts-ignore should type narrow more precisely
       const clone = current.cloneNode(true);
-      // Change from horizontal to vertical for printing and remove gap
       proxyImgSources(clone);
       removeSelectionStyleById(clone, "page-base-");
       removeSelectionStyleById(clone, "content-image-");
@@ -132,7 +161,6 @@ export function useComponentPrinter() {
       removeAllById(clone, "element-menubar-");
       removeAllById(clone, "slide-menubar-");
       insertFonts(clone);
-      // Remove styling from container
       clone.className = "flex flex-col";
       clone.style = {};
 
@@ -142,7 +170,7 @@ export function useComponentPrinter() {
     return componentRef.current;
   }, []);
 
-  const handlePrint = useReactToPrint({
+  const handleExport = useReactToPrint({
     content: reactToPrintContent,
     removeAfterPrint: true,
     onBeforePrint: () => setIsPrinting(true),
@@ -162,10 +190,10 @@ export function useComponentPrinter() {
       }
 
       const SCALE_TO_LINKEDIN_INTRINSIC_SIZE = 1.8;
-      // const fontEmbedCss = await getFontEmbedCSS(html);
+      const filename = watch("filename");
       const options: HtmlToPdfOptions = {
         margin: [0, 0, 0, 0],
-        filename: watch("filename"),
+        filename,
         image: { type: "webp", quality: 0.98 },
         htmlToImage: {
           height: SIZE.height * numPages,
@@ -177,7 +205,6 @@ export function useComponentPrinter() {
         jsPDF: { unit: "px", format: [SIZE.width, SIZE.height] },
       };
 
-      // TODO Create buttons to download as png / svg / etc from 'html-to-image'
       const canvas = await toCanvas(html, options.htmlToImage).catch((err) => {
         console.error(err);
       });
@@ -185,12 +212,34 @@ export function useComponentPrinter() {
         console.error("Failed to create canvas");
         return;
       }
-      // DEBUG:
-      // document.body.appendChild(canvas);
-      const pdf = canvasToPdf(canvas, options);
-      pdf.save(options.filename);
+
+      if (exportModeRef.current === "pdf") {
+        const pdf = canvasToPdf(canvas, options);
+        pdf.save(filename);
+      } else {
+        const images = canvasToImages(canvas, numPages, 0.98);
+        const zip = new JSZip();
+        images.forEach((dataUrl, i) => {
+          const blob = dataUrlToBlob(dataUrl);
+          zip.file(`${filename}-${i + 1}.png`, blob);
+        });
+        const zipBlob = await zip.generateAsync({ type: "blob" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(zipBlob);
+        link.download = `${filename}.zip`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+      }
     },
   });
+
+  const handlePrint = React.useCallback(
+    (mode: ExportMode) => {
+      exportModeRef.current = mode;
+      handleExport();
+    },
+    [handleExport]
+  );
 
   return {
     componentRef,
@@ -200,21 +249,19 @@ export function useComponentPrinter() {
 }
 
 function proxyImgSources(html: HTMLElement) {
-  // @ts-ignore
+  const url = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+
   const images = Array.from(
     html.getElementsByTagName("img")
   ) as HTMLImageElement[];
-  const url = process.env.NEXT_PUBLIC_APP_URL;
 
   const externalImages = images.filter(
     (image) => !image.src.startsWith("/") && !image.src.startsWith("data:")
   );
 
-  // TODO: Make a single request with the list of images
   externalImages.forEach((image) => {
     const apiRequestURL = new URL(`${url}/api/proxy`);
     apiRequestURL.searchParams.set("url", image.src);
-    // TODO: Consider using the cache of fetch
     image.src = apiRequestURL.toString();
   });
 }

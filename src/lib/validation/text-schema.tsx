@@ -10,6 +10,9 @@ export type TextALignType = z.infer<typeof TextALignType>;
 export const TextStyleSchema = z.object({
   fontSize: FontSizeType.default(FontSizeType.enum.Medium),
   align: TextALignType.default(TextALignType.enum.Left),
+  lineHeight: z.number().min(0.5).max(4).default(1.3),
+  letterSpacing: z.number().min(-0.1).max(0.5).default(0),
+  paragraphSpacing: z.number().min(0).max(3).default(0),
 });
 
 export const UnstyledTitleSchema = z.object({

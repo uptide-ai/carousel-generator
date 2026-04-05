@@ -44,6 +44,9 @@ export function Description({
       )}
       style={{
         color: config.theme.secondary,
+        lineHeight: style.lineHeight ?? 1.3,
+        letterSpacing: `${style.letterSpacing ?? 0}em`,
+        marginBottom: `${style.paragraphSpacing ?? 0}em`,
       }}
     />
   );

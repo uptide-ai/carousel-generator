@@ -47,6 +47,9 @@ export function Title({
       )}
       style={{
         color: config.theme.primary,
+        lineHeight: style.lineHeight ?? 1.3,
+        letterSpacing: `${style.letterSpacing ?? 0}em`,
+        marginBottom: `${style.paragraphSpacing ?? 0}em`,
       }}
     />
   );

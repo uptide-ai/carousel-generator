@@ -2,6 +2,7 @@ import * as z from "zod";
 import { DEFAULT_IMAGE_INPUT, ImageSchema } from "./image-schema";
 
 export const BrandSchema = z.object({
+  showBrand: z.boolean().default(true),
   avatar: ImageSchema.default(DEFAULT_IMAGE_INPUT),
   name: z
     .string()
