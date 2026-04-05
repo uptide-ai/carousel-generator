@@ -33,7 +33,7 @@ export function Subtitle({
       label={""}
       placeholder={"Your subtitle here"}
       className={cn(
-        `font-bold`,
+        ``,
         textStyleToClasses({
           style: style,
           sizes: ["text-3xl", "text-2xl", "text-xl"],
@@ -43,8 +43,9 @@ export function Subtitle({
       )}
       style={{
         color: config.theme.secondary,
-        lineHeight: style.lineHeight ?? 1.3,
-        letterSpacing: `${style.letterSpacing ?? 0}em`,
+        fontWeight: config.fonts.font1Style?.fontWeight ?? 700,
+        lineHeight: config.fonts.font1Style?.lineHeight ?? 1.3,
+        letterSpacing: `${config.fonts.font1Style?.letterSpacing ?? 0}em`,
         marginBottom: `${style.paragraphSpacing ?? 0}em`,
       }}
     />

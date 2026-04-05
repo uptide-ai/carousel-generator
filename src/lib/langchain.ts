@@ -37,7 +37,6 @@ Guidelines:
  - Each slide has 2-3 different elements. E.g. [Title, Description], or [Title, Subtitle], or [Subtitle, Description].
  - Each slide All the elements in that slide are about that idea.
  - Adapt, reorganize and rephrase the content to fit the slides format.
- - Add Emojis to the text in Title, Subtitle and Description.
  - Don't add slide numbers.
  - Description element text should be short.
 `;

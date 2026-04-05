@@ -32,6 +32,8 @@ export const defaultValues = {
     fonts: {
       font1: "DM_Serif_Display",
       font2: "DM_Sans",
+      font1Style: { lineHeight: 1.3, letterSpacing: 0, fontWeight: 700 },
+      font2Style: { lineHeight: 1.3, letterSpacing: 0, fontWeight: 500 },
     },
     pageNumber: {
       showNumbers: true,

@@ -9,7 +9,7 @@ Deployed at carouselgenerator.vercel.app.
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS + shadcn/ui (Radix primitives)
 - **State**: React Hook Form + Zod validation + React Context
-- **AI**: OpenAI (gpt-4o-mini) via LangChain function calling
+- **AI**: Anthropic Claude Haiku 4.5 via `@anthropic-ai/sdk` tool use
 - **Export**: html-to-image + jsPDF (PDF) or JSZip (images ZIP)
 - **Carousel UI**: embla-carousel-react
 - **Package Manager**: pnpm
@@ -79,7 +79,7 @@ src/
       form-provider.tsx       # Re-export of React Hook Form's FormProvider
       pager-context.tsx       # Current page state + navigation
       selection-context.tsx   # Currently selected element field path
-      keys-context.tsx        # OpenAI API key
+      keys-context.tsx        # API key context (legacy, server-side key used now)
       editor-status-context.tsx  # Loading/ready status for AI generation
       reference-context.tsx   # DOM ref to carousel for PDF export
     hooks/
@@ -102,7 +102,7 @@ src/
     default-document.tsx  # Default doc with 5 slides (Intro, 3 Content, Outro)
     default-slides.tsx    # Template slides per type
     convert-file.tsx      # File → base64 data URL conversion
-    langchain.ts          # LangChain OpenAI setup + carousel generation prompt
+    langchain.ts          # Anthropic Claude SDK + carousel generation prompt
 ```
 
 ## Data Model
@@ -152,6 +152,46 @@ All state lives in a single React Hook Form instance (`useForm` with `zodResolve
 - **Expand image layout**: CommonPage detects Expand images at first/last position to adjust PageFrame padding (pt-0/pb-0) and PageLayout justify. Negative margins on ElementMenubarWrapper push image edge-to-edge.
 - **Export modes**: Download button opens popover with PDF (jsPDF) or Images ZIP (JSZip) options. Both use html-to-image canvas pipeline. Image proxy (api/proxy) handles CORS; falls back to window.location.origin if NEXT_PUBLIC_APP_URL not set.
 
+## AI Generation (Generate with AI)
+
+### Flow
+1. User types prompt in `AIInputForm` → sent as `"A carousel with about \"<prompt>\""`
+2. Next.js server action `generateCarouselSlidesAction()` calls Anthropic API
+3. Claude Haiku 4.5 responds via **tool use** (`carouselCreator` tool) with structured JSON
+4. Response validated against `UnstyledDocumentSchema` (Zod safeParse)
+5. Valid output transformed to `MultiSlideSchema` (adds default styles: fontSize, align, etc.)
+6. `setValue("slides", generatedSlides)` **replaces all slides** in React Hook Form state
+7. UI re-renders, localStorage auto-saves
+
+### AI Output Schema (Unstyled)
+```json
+{
+  "slides": [
+    {
+      "elements": [
+        { "type": "Title", "text": "Your Title Here" },
+        { "type": "Subtitle", "text": "A subtitle" },
+        { "type": "Description", "text": "Short description" }
+      ]
+    }
+  ]
+}
+```
+After validation, Zod applies default styles (fontSize: "Medium", align: "Left", lineHeight: 1.3, etc.) and adds empty `backgroundImage` to each slide.
+
+### Capabilities & Limitations
+- **Create only** — no edit/update; generation replaces all existing slides
+- **Text elements only** — AI generates Title (max 160 chars), Subtitle (max 160 chars), Description (max 240 chars)
+- **No images from AI** — images must be added manually after generation; schema supports them but prompt restricts to text
+- **8-15 slides** per generation, 2-3 elements per slide
+- **Article mode** exists (`AITextAreaForm`) but is commented out in `ai-panel.tsx` (TODO)
+
+### Key Files
+- `src/lib/langchain.ts` — prompt, Anthropic SDK client, tool schema, validation
+- `src/app/actions.tsx` — server action wrapper with rate limiting
+- `src/components/ai-input-form.tsx` — UI form, calls server action, updates form state
+- `src/lib/validation/slide-schema.tsx` — `UnstyledDocumentSchema`, `MultiSlideSchema`
+
 ## Commands
 
 ```bash
@@ -164,8 +204,7 @@ pnpm lint         # ESLint
 
 ```
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_OPENAI_KEY=     # Client-side OpenAI key (for testing)
-OPENAI_API_KEY=""           # Server-side OpenAI key
+ANTHROPIC_API_KEY=""        # Server-side Anthropic key (Claude Haiku)
 KV_REST_API_URL=""          # Optional: Upstash Redis for rate limiting
 KV_REST_API_TOKEN=""        # Optional: Upstash Redis token
 ```

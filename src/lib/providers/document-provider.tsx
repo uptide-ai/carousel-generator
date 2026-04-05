@@ -18,10 +18,14 @@ import { defaultValues } from "@/lib/default-document";
 import { KeysProvider } from "@/lib/providers/keys-context";
 import { useKeys } from "@/lib/hooks/use-keys";
 import { StatusProvider } from "@/lib/providers/editor-status-context";
+import { useState, useEffect } from "react";
 
 const FORM_DATA_KEY = "documentFormKey";
 
 export function DocumentProvider({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   const { getSavedData } = useRetrieveFormValues(
     FORM_DATA_KEY,
     defaultValues,
@@ -41,6 +45,9 @@ export function DocumentProvider({ children }: { children: React.ReactNode }) {
 
   const selection = useSelection();
   const pager = usePager(0);
+
+  if (!mounted) return null;
+
   return (
     <KeysProvider value={keys}>
       <FormProvider {...documentForm}>

@@ -37,7 +37,7 @@ export function Title({
       placeholder={"Your title here"}
       className={cn(
         // text-balance has some issues with text area
-        `font-black `,
+        ``,
         textStyleToClasses({
           style: style,
           sizes: ["text-7xl", "text-5xl", "text-3xl"],
@@ -47,8 +47,9 @@ export function Title({
       )}
       style={{
         color: config.theme.primary,
-        lineHeight: style.lineHeight ?? 1.3,
-        letterSpacing: `${style.letterSpacing ?? 0}em`,
+        fontWeight: config.fonts.font1Style?.fontWeight ?? 700,
+        lineHeight: config.fonts.font1Style?.lineHeight ?? 1.3,
+        letterSpacing: `${config.fonts.font1Style?.letterSpacing ?? 0}em`,
         marginBottom: `${style.paragraphSpacing ?? 0}em`,
       }}
     />

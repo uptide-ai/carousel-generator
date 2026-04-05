@@ -40,6 +40,7 @@
     "browser-image-compression": "^2.0.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
+    "cmdk": "^1.1.1",
     "culori": "^3.3.0",
     "deepmerge": "^4.3.1",
     "dotenv": "^16.3.1",

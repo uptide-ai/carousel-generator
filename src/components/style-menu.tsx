@@ -109,28 +109,6 @@ export function StyleMenu({
             itemClassName="h-10 w-10"
           />
         ) : null}
-        {style && Object.hasOwn(style, "lineHeight") ? (
-          <SliderInputField
-            fieldName={`${stylePath}.lineHeight`}
-            form={form}
-            label="Line Height"
-            min={0.5}
-            max={4}
-            step={0.1}
-            className="w-full"
-          />
-        ) : null}
-        {style && Object.hasOwn(style, "letterSpacing") ? (
-          <SliderInputField
-            fieldName={`${stylePath}.letterSpacing`}
-            form={form}
-            label="Letter Spacing"
-            min={-0.1}
-            max={0.5}
-            step={0.01}
-            className="w-full"
-          />
-        ) : null}
         {style && Object.hasOwn(style, "paragraphSpacing") ? (
           <SliderInputField
             fieldName={`${stylePath}.paragraphSpacing`}

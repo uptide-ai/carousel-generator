@@ -34,7 +34,7 @@ export function Description({
       label={""}
       placeholder={"Your description here"}
       className={cn(
-        `font-medium`,
+        ``,
         textStyleToClasses({
           style: style,
           sizes: ["text-xl", "text-lg", "text-base"],
@@ -44,8 +44,9 @@ export function Description({
       )}
       style={{
         color: config.theme.secondary,
-        lineHeight: style.lineHeight ?? 1.3,
-        letterSpacing: `${style.letterSpacing ?? 0}em`,
+        fontWeight: config.fonts.font2Style?.fontWeight ?? 700,
+        lineHeight: config.fonts.font2Style?.lineHeight ?? 1.3,
+        letterSpacing: `${config.fonts.font2Style?.letterSpacing ?? 0}em`,
         marginBottom: `${style.paragraphSpacing ?? 0}em`,
       }}
     />
