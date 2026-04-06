@@ -22,7 +22,7 @@ export function NewPage({
     <Button
       className={cn("border-dashed border-2", className)}
       variant={"outline"}
-      onClick={() => handleAddPage(SlideType.enum.Common)}
+      onClick={() => handleAddPage(SlideType.enum.Content)}
       style={{
         width: `${isSideButton ? size.width / 4 : size.width}px`,
         height: `${size.height}px`,
