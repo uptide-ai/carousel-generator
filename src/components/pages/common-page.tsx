@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import * as z from "zod";
 import { ConfigSchema } from "@/lib/validation/document-schema";
 import Footer from "../elements/footer";
@@ -22,7 +22,6 @@ import { AddElement } from "@/components/pages/add-element";
 import { ElementType } from "@/lib/validation/element-type";
 import { ContentImage, ContentImageFillLayer } from "@/components/elements/content-image";
 import ElementMenubarWrapper from "@/components/element-menubar-wrapper";
-import { useElementSize } from "usehooks-ts";
 import { ObjectFitType, ContentImageSchema } from "@/lib/validation/image-schema";
 
 export function CommonPage({
@@ -40,31 +39,7 @@ export function CommonPage({
   fieldName: SlideFieldPath;
   className?: string;
 }) {
-  const LAYOUT_GAP = 8;
-  const FRAME_PADDING = 40;
   const backgroundImageField = fieldName + ".backgroundImage";
-  const [elementsHeight, setElementsHeight] = useState<number | null>(null);
-  const [footerRef, footerDimensions] = useElementSize();
-  const inputRefs = React.useRef<HTMLDivElement[]>([]);
-  const offsetHeights = inputRefs.current.map((ref) => ref.offsetHeight);
-
-  React.useEffect(
-    () => {
-      const elementsHeights = inputRefs.current
-        .filter((ref) => ref)
-        .map((ref) => ref.offsetHeight);
-      // Gap between existent elements + 1 for the element to be introduced by add button
-      const gapHeights = elementsHeights.length * LAYOUT_GAP;
-      setElementsHeight(
-        elementsHeights.reduce((acc, el) => acc + el, 0) + gapHeights
-      );
-    },
-    [offsetHeights]
-    // TODO ADD dependencies
-  );
-  const remainingHeight = elementsHeight
-    ? size.height - FRAME_PADDING * 2 - footerDimensions.height - elementsHeight
-    : 0;
 
   const firstElement = slide.elements[0];
   const lastElement = slide.elements[slide.elements.length - 1];
@@ -112,9 +87,6 @@ export function CommonPage({
               <ElementMenubarWrapper
                 key={currentField}
                 fieldName={currentField}
-                ref={(el) => {
-                  el ? (inputRefs.current[index] = el) : null;
-                }}
               >
                 <Title fieldName={currentField as TextFieldPath} />
               </ElementMenubarWrapper>
@@ -122,9 +94,6 @@ export function CommonPage({
               <ElementMenubarWrapper
                 key={currentField}
                 fieldName={currentField}
-                ref={(el) => {
-                  el ? (inputRefs.current[index] = el) : null;
-                }}
               >
                 <Subtitle fieldName={currentField as TextFieldPath} />
               </ElementMenubarWrapper>
@@ -132,9 +101,6 @@ export function CommonPage({
               <ElementMenubarWrapper
                 key={currentField}
                 fieldName={currentField}
-                ref={(el) => {
-                  el ? (inputRefs.current[index] = el) : null;
-                }}
               >
                 <Description fieldName={currentField as TextFieldPath} />
               </ElementMenubarWrapper>
@@ -142,9 +108,6 @@ export function CommonPage({
               <ElementMenubarWrapper
                 key={currentField}
                 fieldName={currentField}
-                ref={(el) => {
-                  el ? (inputRefs.current[index] = el) : null;
-                }}
                 style={
                   element.style.objectFit === ObjectFitType.enum.Expand
                     ? {
@@ -165,17 +128,17 @@ export function CommonPage({
               </ElementMenubarWrapper>
             ) : null;
           })}
-          {/* // TODO Replace 50 by the element size of element to introduce or minimum of all elements */}
-          {remainingHeight && remainingHeight >= 50 ? (
-            <AddElement
-              fieldName={(fieldName + ".elements") as ElementArrayFieldPath}
-            />
-          ) : null}
         </PageLayout>
-        {!lastIsExpand && (
-          <Footer number={index + 1} config={config} ref={footerRef} />
-        )}
+        <div>
+          {!lastIsExpand && (
+            <Footer number={index + 1} config={config} />
+          )}
+        </div>
       </PageFrame>
+      <AddElement
+        fieldName={(fieldName + ".elements") as ElementArrayFieldPath}
+        className="absolute bottom-3 right-3 z-10"
+      />
     </PageBase>
   );
 }

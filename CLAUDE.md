@@ -156,14 +156,14 @@ All state lives in a single React Hook Form instance (`useForm` with `zodResolve
 - **Deep clone for mutations**: `JSON.parse(JSON.stringify(obj))` when duplicating slides/elements
 - **Menubar wrappers**: `SlideMenubarWrapper` and `ElementMenubarWrapper` add context actions (move/clone/delete/change type) to their children
 - **Expand image layout**: CommonPage detects Expand images at first/last position to adjust PageFrame padding (pt-0/pb-0) and PageLayout justify. Negative margins on ElementMenubarWrapper push image edge-to-edge. `marginBottom` on Expand wrapper is only applied if not the last element.
-- **Element menubar positioning**: Positioned at `-top-9 right-0 z-10` (above the element) with border and shadow for visibility. Slide menubar is outside `PageBase` so it's unaffected.
+- **Element menubar positioning**: Positioned at `-top-9 right-0 z-10` (above the element) with border, border-border, and shadow-sm for visibility. Slide menubar is outside `PageBase` so it's unaffected.
 - **Element swap preserves selection**: When moving elements up/down via `ElementMenubar`, `setCurrentSelection` is called with the new field path after `swap()`, so the element stays selected and the menubar remains visible.
 - **AI animation constants** (in `ai-textarea-form.tsx`): `WORD_DELAY` (ms per word), `ELEMENT_PAUSE`, `SLIDE_PAUSE`, `SLIDES_PER_GROUP` — tune these to adjust typewriter speed and navigation rhythm.
 - **Export modes**: Download button opens popover with PDF (jsPDF) or Images ZIP (JSZip) options. Both use html-to-image canvas pipeline. Image proxy (api/proxy) handles CORS; falls back to window.location.origin if NEXT_PUBLIC_APP_URL not set.
 - **Quick-add (no dialogs)**: "+" for new slide directly creates a Content slide (no type picker dialog). "+" for new element directly adds a Description element (no type picker dialog). Dialog components are commented out but preserved for future use (`new-page-dialog-content.tsx`, `new-element-dialog-content.tsx`). Users change element type after creation via the element menubar's swap button.
 - **Keyboard navigation**: Arrow keys navigate between slides via a global `document` keydown listener in `carousel.tsx`. Listener skips navigation when focus is on a `textarea`, `input`, or `contentEditable` element, allowing normal text cursor movement.
 - **Smart carousel scroll**: `document.tsx` only calls `api.scrollTo()` when the target slide is not already visible (`api.slidesInView()`), preventing annoying jumps when clicking a slide that's already on screen.
-- **Slide vertical layout**: `PageFrame` uses CSS Grid (`grid-template-rows: 1fr auto`) so content centers in the top row while Footer sits in the bottom row without stealing vertical center space.
+- **Slide vertical layout**: `PageFrame` uses CSS Grid (`grid-template-rows: 1fr auto`) with 3 children: (1) `PageLayout` in the `1fr` row centers elements with `justify-center`, (2) a wrapper div in the `auto` row holds both `AddElement` button and `Footer`. This ensures the "+" button doesn't affect vertical centering of content elements.
 - **Reset all**: Settings tab has a "Reset all" button that calls `form.reset(defaultValues)` + `localStorage.removeItem("documentFormKey")` to start fresh.
 
 ## AI Formatting (Format with AI)

@@ -1,14 +1,13 @@
 import { Button } from "@/components/ui/button";
-// import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
 import { getSlideNumber } from "@/lib/field-path";
 import { useFormContext, useFieldArray } from "react-hook-form";
-// import { NewElementDialogContent } from "@/components/new-element-dialog-content";
 import {
   DocumentFormReturn,
   ElementArrayFieldPath,
 } from "@/lib/document-form-types";
 import { DescriptionSchema } from "@/lib/validation/text-schema";
+import { cn } from "@/lib/utils";
 
 export function AddElement({
   className,
@@ -25,16 +24,16 @@ export function AddElement({
   });
 
   return (
-    // {/* Dialog with element type selection commented out — directly adds Description */}
     <Button
       id={"add-element-" + pageNumber}
-      className="border-dashed border-2 w-full bg-transparent h-10"
+      className={cn(
+        "rounded-full w-7 h-7 p-0 bg-background/60 hover:bg-background/90 border border-border/50 shadow-sm",
+        className
+      )}
       variant={"outline"}
       onClick={() => append(DescriptionSchema.parse({}))}
     >
-      <div className={`flex flex-col justify-center items-center`}>
-        <Plus className="w-6 h-6" />
-      </div>
+      <Plus className="w-3.5 h-3.5 text-muted-foreground" />
     </Button>
   );
 }
