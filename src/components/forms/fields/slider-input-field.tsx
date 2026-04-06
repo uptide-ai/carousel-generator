@@ -15,6 +15,7 @@ export function SliderInputField({
   min,
   max,
   step,
+  defaultValue,
   className = "",
 }: {
   fieldName: string;
@@ -23,6 +24,7 @@ export function SliderInputField({
   min: number;
   max: number;
   step: number;
+  defaultValue?: number;
   className?: string;
 }) {
   return (
@@ -38,7 +40,7 @@ export function SliderInputField({
                 min={min}
                 max={max}
                 step={step}
-                value={[value ?? min]}
+                value={[value ?? defaultValue ?? min]}
                 onValueChange={(vals) => onChange(vals[0])}
                 className="flex-1"
               />
@@ -47,7 +49,7 @@ export function SliderInputField({
                 min={min}
                 max={max}
                 step={step}
-                value={value ?? min}
+                value={value ?? defaultValue ?? min}
                 onChange={(e) => {
                   const v = parseFloat(e.target.value);
                   if (!isNaN(v) && v >= min && v <= max) {

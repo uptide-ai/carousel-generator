@@ -35,16 +35,13 @@ export function Description({
       placeholder={"Your description here"}
       className={cn(
         ``,
-        textStyleToClasses({
-          style: style,
-          sizes: ["text-xl", "text-lg", "text-base"],
-          globalFontSize: config.fonts.font2Style?.fontSize,
-        }),
+        textStyleToClasses({ style }),
         fontIdToClassName(config.fonts.font2),
         className
       )}
       style={{
         color: config.theme.secondary,
+        fontSize: `${style.fontSize ?? config.fonts.font2Style?.fontSize ?? 18}px`,
         fontWeight: config.fonts.font2Style?.fontWeight ?? 700,
         lineHeight: config.fonts.font2Style?.lineHeight ?? 1.3,
         letterSpacing: `${config.fonts.font2Style?.letterSpacing ?? 0}em`,

@@ -34,12 +34,13 @@ Rules:
 
 Guidelines:
  - Split the provided text into 8-15 slides.
- - Each slide has 2-3 elements. E.g. [Title, Description], or [Title, Subtitle], or [Subtitle, Description].
+ - Each slide has 2-3 elements. E.g. [Title, Description], or [Title, Subtitle], or [Subtitle, Description], etc.
  - Each slide should focus on one idea or section from the text.
  - Preserve the original meaning and wording as much as possible. Only rephrase when needed to fit the slide format.
  - Don't add slide numbers.
  - Don't invent new content. Only use what's in the provided text.
  - Description text should be short and concise.
+ - Pay attention and keep line breaks. If there is a line break (\n) transform into two (\n\n) so the final text is properly spaced.
 `;
 
 export async function generateCarouselSlides(

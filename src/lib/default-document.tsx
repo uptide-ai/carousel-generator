@@ -33,8 +33,8 @@ export const defaultValues = {
     fonts: {
       font1: "Anton",
       font2: "Inter",
-      font1Style: { lineHeight: 1.3, letterSpacing: 0, fontWeight: 500, textBalance: true, fontSize: "Medium" as const },
-      font2Style: { lineHeight: 1.3, letterSpacing: -0.01, fontWeight: 500, textBalance: true, fontSize: "Medium" as const },
+      font1Style: { lineHeight: 1.3, letterSpacing: 0, fontWeight: 500, textBalance: true, fontSize: 48 },
+      font2Style: { lineHeight: 1.3, letterSpacing: -0.01, fontWeight: 500, textBalance: true, fontSize: 18 },
     },
     pageNumber: {
       showNumbers: false,

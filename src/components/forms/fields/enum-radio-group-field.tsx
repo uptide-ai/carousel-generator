@@ -10,7 +10,6 @@ import {
   DocumentFormReturn,
   ImageStyleObjectFitFieldPath,
   TextStyleAlignFieldPath,
-  TextStyleFontSizeFieldPath,
 } from "@/lib/document-form-types";
 import { RadioGroup } from "@radix-ui/react-radio-group";
 import { CustomIndicatorRadioGroupItem } from "@/components/custom-indicator-radio-group-item";
@@ -27,7 +26,6 @@ export function EnumRadioGroupField<T extends string | number | symbol>({
   groupClassName = "",
 }: {
   fieldName:
-    | TextStyleFontSizeFieldPath
     | TextStyleAlignFieldPath
     | ImageStyleObjectFitFieldPath;
   form: DocumentFormReturn;

@@ -34,16 +34,13 @@ export function Subtitle({
       placeholder={"Your subtitle here"}
       className={cn(
         ``,
-        textStyleToClasses({
-          style: style,
-          sizes: ["text-3xl", "text-2xl", "text-xl"],
-          globalFontSize: config.fonts.font1Style?.fontSize,
-        }),
+        textStyleToClasses({ style }),
         fontIdToClassName(config.fonts.font1),
         className
       )}
       style={{
         color: config.theme.secondary,
+        fontSize: `${style.fontSize ?? Math.round((config.fonts.font1Style?.fontSize ?? 48) * 0.65)}px`,
         fontWeight: config.fonts.font1Style?.fontWeight ?? 700,
         lineHeight: config.fonts.font1Style?.lineHeight ?? 1.3,
         letterSpacing: `${config.fonts.font1Style?.letterSpacing ?? 0}em`,

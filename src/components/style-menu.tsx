@@ -10,7 +10,6 @@ import {
   ImageStyleOpacityFieldPath,
   StyleFieldPath,
   TextStyleAlignFieldPath,
-  TextStyleFontSizeFieldPath,
 } from "@/lib/document-form-types";
 import { cn } from "@/lib/utils";
 import React from "react";
@@ -22,9 +21,8 @@ import {
   Maximize2,
   MoveHorizontal,
   Expand,
-  Type,
 } from "lucide-react";
-import { FontSizeType, TextALignType } from "@/lib/validation/text-schema";
+import { TextALignType } from "@/lib/validation/text-schema";
 import { OpacityFormField } from "@/components/forms/fields/opacity-form-field";
 import { ImageSourceFormField } from "@/components/forms/fields/image-source-form-field";
 import { SliderInputField } from "@/components/forms/fields/slider-input-field";
@@ -37,12 +35,6 @@ import {
   TypographyLarge,
 } from "@/components/typography";
 import { Separator } from "@/components/ui/separator";
-
-const fontSizeMap: Record<FontSizeType, React.ReactElement> = {
-  [FontSizeType.enum.Small]: <Type className="h-2 w-2" />,
-  [FontSizeType.enum.Medium]: <Type className="h-3 w-3" />,
-  [FontSizeType.enum.Large]: <Type className="h-4 w-4" />,
-};
 
 const textAlignMap: Record<TextALignType, React.ReactElement> = {
   [TextALignType.enum.Left]: <AlignLeft className="h-4 w-4" />,
@@ -72,6 +64,22 @@ export function StyleMenu({
   const values = form.getValues(elementPath as ElementFieldPath);
   const style = values.style;
   const type = values.type;
+  const isTextElement =
+    type === ElementType.enum.Title ||
+    type === ElementType.enum.Subtitle ||
+    type === ElementType.enum.Description;
+
+  // Compute effective fontSize default based on element type and global config
+  const config = form.getValues("config");
+  const globalFont1Size = config.fonts.font1Style?.fontSize ?? 48;
+  const globalFont2Size = config.fonts.font2Style?.fontSize ?? 18;
+  const effectiveFontSize =
+    type === ElementType.enum.Title
+      ? globalFont1Size
+      : type === ElementType.enum.Subtitle
+      ? Math.round(globalFont1Size * 0.65)
+      : globalFont2Size;
+
   return (
     <div
       className={cn("grid gap-4", className)}
@@ -89,14 +97,16 @@ export function StyleMenu({
       </div>
       <Separator orientation="horizontal"></Separator>
       <div className="flex flex-col gap-6 items-start">
-        {style && Object.hasOwn(style, "fontSize") ? (
-          <EnumRadioGroupField
-            name="Font Size"
+        {isTextElement ? (
+          <SliderInputField
+            fieldName={`${stylePath}.fontSize`}
             form={form}
-            fieldName={`${stylePath}.fontSize` as TextStyleFontSizeFieldPath}
-            enumValueElements={fontSizeMap}
-            groupClassName="grid grid-cols-3 gap-1"
-            itemClassName="h-10 w-10"
+            label="Font Size"
+            min={8}
+            max={120}
+            step={1}
+            defaultValue={effectiveFontSize}
+            className="w-full"
           />
         ) : null}
         {style && Object.hasOwn(style, "align") ? (

@@ -80,8 +80,14 @@ const Carousel = React.forwardRef<
       api?.scrollNext()
     }, [api])
 
-    const handleKeyDown = React.useCallback(
-      (event: React.KeyboardEvent<HTMLDivElement>) => {
+    React.useEffect(() => {
+      const handleKeyDown = (event: KeyboardEvent) => {
+        const target = event.target as HTMLElement
+        const tagName = target.tagName.toLowerCase()
+        if (tagName === "textarea" || tagName === "input" || target.isContentEditable) {
+          return
+        }
+
         if (event.key === "ArrowLeft") {
           event.preventDefault()
           scrollPrev()
@@ -89,9 +95,11 @@ const Carousel = React.forwardRef<
           event.preventDefault()
           scrollNext()
         }
-      },
-      [scrollPrev, scrollNext]
-    )
+      }
+
+      document.addEventListener("keydown", handleKeyDown)
+      return () => document.removeEventListener("keydown", handleKeyDown)
+    }, [scrollPrev, scrollNext])
 
     React.useEffect(() => {
       if (!api || !setApi) {
@@ -131,7 +139,6 @@ const Carousel = React.forwardRef<
       >
         <div
           ref={ref}
-          onKeyDownCapture={handleKeyDown}
           className={cn("relative", className)}
           role="region"
           aria-roledescription="carousel"

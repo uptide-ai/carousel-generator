@@ -29,14 +29,11 @@ import { cn } from "@/lib/utils";
 import { fontsMap } from "@/lib/fonts-map";
 import { DocumentFormReturn } from "@/lib/document-form-types";
 import { SliderInputField } from "@/components/forms/fields/slider-input-field";
-import { EnumRadioGroupField } from "@/components/forms/fields/enum-radio-group-field";
 import { Separator } from "@/components/ui/separator";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   FormControl,
 } from "@/components/ui/form";
-import { FontSizeType } from "@/lib/validation/text-schema";
-import { Type } from "lucide-react";
 
 const fontEntries = Object.entries(fontsMap).map(([id, info]) => ({
   id,
@@ -120,21 +117,16 @@ function FontStyleFields({
   form: DocumentFormReturn;
   prefix: "config.fonts.font1Style" | "config.fonts.font2Style";
 }) {
-  const fontSizeMap: Record<string, React.ReactElement> = {
-    [FontSizeType.enum.Small]: <Type className="h-2 w-2" />,
-    [FontSizeType.enum.Medium]: <Type className="h-3 w-3" />,
-    [FontSizeType.enum.Large]: <Type className="h-4 w-4" />,
-  };
-
   return (
     <div className="flex flex-col gap-4">
-      <EnumRadioGroupField
-        name="Font Size"
+      <SliderInputField
+        fieldName={`${prefix}.fontSize`}
         form={form}
-        fieldName={`${prefix}.fontSize` as any}
-        enumValueElements={fontSizeMap}
-        groupClassName="grid grid-cols-3 gap-1"
-        itemClassName="h-10 w-10"
+        label="Font Size"
+        min={8}
+        max={120}
+        step={1}
+        className="w-full"
       />
       <SliderInputField
         fieldName={`${prefix}.fontWeight`}

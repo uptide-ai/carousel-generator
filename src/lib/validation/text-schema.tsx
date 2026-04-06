@@ -1,14 +1,11 @@
 import { ElementType } from "@/lib/validation/element-type";
 import * as z from "zod";
 
-export const FontSizeType = z.enum(["Small", "Medium", "Large"]);
-export type FontSizeType = z.infer<typeof FontSizeType>;
-
 export const TextALignType = z.enum(["Left", "Center", "Right"]);
 export type TextALignType = z.infer<typeof TextALignType>;
 
 export const TextStyleSchema = z.object({
-  fontSize: FontSizeType.optional(), // undefined = use global from config.fonts.fontXStyle.fontSize
+  fontSize: z.number().min(8).max(200).optional(), // px — undefined = computed from global font size
   align: TextALignType.default(TextALignType.enum.Left),
   lineHeight: z.number().min(0.5).max(4).default(1.3),
   letterSpacing: z.number().min(-0.1).max(0.5).default(0),

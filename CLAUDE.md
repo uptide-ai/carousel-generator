@@ -72,7 +72,7 @@ src/
       image-schema.tsx      # Image/ContentImage schemas + ImageStyleSchema
       theme-schema.tsx      # ThemeSchema: primary/secondary/background hex + palette + padding
       brand-schema.tsx      # BrandSchema: name, handle, avatar
-      fonts-schema.tsx      # FontsSchema: font1, font2, font1Style, font2Style (lineHeight, letterSpacing, fontWeight, textBalance)
+      fonts-schema.tsx      # FontsSchema: font1, font2, font1Style, font2Style (fontSize, lineHeight, letterSpacing, fontWeight, textBalance)
       page-number-schema.tsx  # PageNumberSchema: showNumbers boolean
     providers/
       document-provider.tsx   # Root provider: form + all contexts + localStorage persistence
@@ -125,8 +125,9 @@ Document
 ```
 
 **Element types**: Title, Subtitle, Description, ContentImage, Image
-**Text style** (per-element override): fontSize (Small/Medium/Large, optional — if unset uses global), align (Left/Center/Right), paragraphSpacing/bottomSpacing (0-3em)
-**Font style** (global per-font in config.fonts): fontSize (Small/Medium/Large), lineHeight (0.5-4), letterSpacing (-0.1 to 0.5em), fontWeight (100-900), textBalance (boolean → `text-wrap: balance`)
+**Text style** (per-element override): fontSize (8-200px, optional — if unset computed from global), align (Left/Center/Right), paragraphSpacing/bottomSpacing (0-3em)
+**Font style** (global per-font in config.fonts): fontSize (8-200px, default font1=48, font2=18), lineHeight (0.5-4), letterSpacing (-0.1 to 0.5em), fontWeight (100-900), textBalance (boolean → `text-wrap: balance`)
+**Font size proportional scaling**: Title uses global font1 fontSize directly. Subtitle uses font1 fontSize × 0.65. Description uses global font2 fontSize. Per-element fontSize override takes priority over global.
 **Slide padding**: configurable via `config.theme.padding` (0-80px, default 40px) — controls inner padding of all slides
 **Image style**: opacity (0-100), objectFit (Contain/Cover/Expand/Fill)
   - Contain: image fits inside element
@@ -153,6 +154,8 @@ All state lives in a single React Hook Form instance (`useForm` with `zodResolve
 - **Menubar wrappers**: `SlideMenubarWrapper` and `ElementMenubarWrapper` add context actions (move/clone/delete/change type) to their children
 - **Expand image layout**: CommonPage detects Expand images at first/last position to adjust PageFrame padding (pt-0/pb-0) and PageLayout justify. Negative margins on ElementMenubarWrapper push image edge-to-edge.
 - **Export modes**: Download button opens popover with PDF (jsPDF) or Images ZIP (JSZip) options. Both use html-to-image canvas pipeline. Image proxy (api/proxy) handles CORS; falls back to window.location.origin if NEXT_PUBLIC_APP_URL not set.
+- **Quick-add (no dialogs)**: "+" for new slide directly creates a Content slide (no type picker dialog). "+" for new element directly adds a Description element (no type picker dialog). Dialog components are commented out but preserved for future use (`new-page-dialog-content.tsx`, `new-element-dialog-content.tsx`). Users change element type after creation via the element menubar's swap button.
+- **Keyboard navigation**: Arrow keys navigate between slides via a global `document` keydown listener in `carousel.tsx`. Listener skips navigation when focus is on a `textarea`, `input`, or `contentEditable` element, allowing normal text cursor movement.
 
 ## AI Formatting (Format with AI)
 
@@ -195,7 +198,7 @@ All state lives in a single React Hook Form instance (`useForm` with `zodResolve
   ]
 }
 ```
-After validation, Zod applies default styles (fontSize: "Medium", align: "Left", lineHeight: 1.3, etc.) and adds empty `backgroundImage` to each slide.
+After validation, Zod applies default styles (align: "Left", lineHeight: 1.3, etc.) and adds empty `backgroundImage` to each slide. fontSize is left unset (optional) so elements inherit from global font size.
 
 ### Capabilities & Limitations
 - **Format only** — AI organizes/splits provided text into slides, does NOT generate new content
