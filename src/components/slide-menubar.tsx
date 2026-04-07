@@ -7,6 +7,7 @@ import {
   CornerUpRight,
   CornerUpLeft,
   Copy,
+  ImageDown,
   Trash,
   ChevronLeft,
   ChevronRight,
@@ -19,6 +20,8 @@ import {
 import { useFieldArrayValues } from "@/lib/hooks/use-field-array-values";
 import { cn } from "@/lib/utils";
 import { getSlideNumber } from "@/lib/field-path";
+import { SIZE } from "@/lib/page-size";
+import { toPng } from "html-to-image";
 import React, { useState, useRef, useEffect } from "react";
 
 function SlideColorPicker({
@@ -108,8 +111,38 @@ export default function SlideMenubar({
   const { numPages } = useFieldArrayValues("slides");
   const { watch }: DocumentFormReturn = useFormContext(); // retrieve those props
   const currentSlidesValues = watch("slides");
+  const filename = watch("filename");
   const currentPage = getSlideNumber(fieldName);
   const { remove, swap, insert } = slidesFieldArray;
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportSlide = async () => {
+    const element = document.getElementById(`page-base-${currentPage}`);
+    if (!element || isExporting) return;
+    setIsExporting(true);
+    try {
+      const SCALE = 1.8;
+      const dataUrl = await toPng(element, {
+        canvasWidth: SIZE.width * SCALE,
+        canvasHeight: SIZE.height * SCALE,
+        filter: (node) => {
+          if (node instanceof HTMLElement) {
+            const id = node.id || "";
+            if (id.startsWith("add-element-") || id.startsWith("element-menubar-")) return false;
+          }
+          return true;
+        },
+      });
+      const link = document.createElement("a");
+      link.download = `${filename}-slide-${currentPage + 1}.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error("Failed to export slide:", err);
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   return (
     <div
@@ -151,6 +184,16 @@ export default function SlideMenubar({
         size="icon"
       >
         <Copy className="w-4 h-4" />
+      </Button>
+      <Button
+        onClick={handleExportSlide}
+        disabled={isExporting}
+        variant="ghost"
+        className="w-8 h-8"
+        size="icon"
+        title="Export slide as PNG"
+      >
+        <ImageDown className="w-4 h-4" />
       </Button>
       <Button
         onClick={() => {

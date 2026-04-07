@@ -39,6 +39,21 @@ export function BrandForm({}: {}) {
         />
         <FormField
           control={form.control}
+          name="config.pageNumber.showNumbers"
+          render={({ field }) => (
+            <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+              <FormControl>
+                <Checkbox
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                />
+              </FormControl>
+              <FormLabel className="text-sm font-medium">Show page numbers</FormLabel>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
           name="config.brand.name"
           render={({ field }) => (
             <FormItem>

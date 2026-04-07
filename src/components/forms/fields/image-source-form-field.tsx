@@ -58,7 +58,7 @@ export function ImageSourceFormField({
                 <FormLabel>{""}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Url to an image"
+                    placeholder="URL to an image"
                     className="resize-none"
                     {...field}
                   />

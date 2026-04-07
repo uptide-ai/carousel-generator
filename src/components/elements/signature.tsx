@@ -28,9 +28,9 @@ export function Signature({
           }}
         />
       )}
-      <div className={`flex items-start flex-col`}>
+      <div className={`flex items-center gap-2 flex-1 min-w-0`}>
         <p
-          className={cn(`text-base`, fontIdToClassName(config.fonts.font2))}
+          className={cn(`text-base truncate`, fontIdToClassName(config.fonts.font2))}
           style={{
             color: config.theme.primary,
           }}
@@ -39,7 +39,7 @@ export function Signature({
         </p>
         <p
           className={cn(
-            `text-sm font-normal`,
+            `text-sm font-normal truncate`,
             fontIdToClassName(config.fonts.font2)
           )}
           style={{

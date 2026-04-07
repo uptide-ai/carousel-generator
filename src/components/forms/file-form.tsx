@@ -45,22 +45,13 @@ export function FileForm() {
         <p className="text-sm font-medium text-muted-foreground mb-2">
           Settings
         </p>
-        <JsonExporter
-          values={watch("config")}
-          filename={"carousel-settings.json"}
-        >
-          <Button variant="ghost" className="w-full justify-start gap-2 h-9">
-            <Download className="h-4 w-4" />
-            Export Settings
-          </Button>
-        </JsonExporter>
         <Dialog
           open={isConfigDialogOpen}
           onOpenChange={setIsConfigDialogOpen}
         >
           <DialogTrigger asChild>
             <Button variant="ghost" className="w-full justify-start gap-2 h-9">
-              <Upload className="h-4 w-4" />
+              <Download className="h-4 w-4" />
               Import Settings
             </Button>
           </DialogTrigger>
@@ -78,6 +69,15 @@ export function FileForm() {
             />
           </DialogContent>
         </Dialog>
+        <JsonExporter
+          values={watch("config")}
+          filename={"carousel-settings.json"}
+        >
+          <Button variant="ghost" className="w-full justify-start gap-2 h-9">
+            <Upload className="h-4 w-4" />
+            Export Settings
+          </Button>
+        </JsonExporter>
       </div>
 
       <Separator />
@@ -86,22 +86,13 @@ export function FileForm() {
         <p className="text-sm font-medium text-muted-foreground mb-2">
           Content
         </p>
-        <JsonExporter
-          values={watch("slides")}
-          filename={"carousel-content.json"}
-        >
-          <Button variant="ghost" className="w-full justify-start gap-2 h-9">
-            <Download className="h-4 w-4" />
-            Export Content
-          </Button>
-        </JsonExporter>
         <Dialog
           open={isContentDialogOpen}
           onOpenChange={setIsContentDialogOpen}
         >
           <DialogTrigger asChild>
             <Button variant="ghost" className="w-full justify-start gap-2 h-9">
-              <Upload className="h-4 w-4" />
+              <Download className="h-4 w-4" />
               Import Content
             </Button>
           </DialogTrigger>
@@ -119,6 +110,15 @@ export function FileForm() {
             />
           </DialogContent>
         </Dialog>
+        <JsonExporter
+          values={watch("slides")}
+          filename={"carousel-content.json"}
+        >
+          <Button variant="ghost" className="w-full justify-start gap-2 h-9">
+            <Upload className="h-4 w-4" />
+            Export Content
+          </Button>
+        </JsonExporter>
       </div>
 
       <Separator />

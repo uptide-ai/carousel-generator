@@ -51,7 +51,7 @@
     "jspdf": "^2.5.1",
     "jszip": "^3.10.1",
     "langchain": "^0.0.209",
-    "lucide-react": "^0.268.0",
+    "lucide-react": "^1.7.0",
     "next": "14.0.4",
     "openai": "^4.20.1",
     "postcss": "8.4.28",

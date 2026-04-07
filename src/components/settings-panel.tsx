@@ -15,7 +15,6 @@ import {
 import { usePagerContext } from "@/lib/providers/pager-context";
 import { Separator } from "@/components/ui/separator";
 import { FontsForm } from "@/components/forms/fonts-form";
-import { PageNumberForm } from "./forms/page-number-form";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import {
   Briefcase,
@@ -177,8 +176,6 @@ export function SidebarTabsPanel() {
             <Separator className="mt-2 mb-4"></Separator>
             <BrandForm />
             <Separator className="mt-6 mb-4"></Separator>
-            <PageNumberForm />
-            <Separator className="mt-6 mb-4"></Separator>
             <Button
               variant="destructive"
               className="w-full"
@@ -252,8 +249,6 @@ export function DrawerFormsPanel({ className }: { className: string }) {
             <h4 className="text-xl font-semibold">{ALL_FORMS.settings.name}</h4>
             <Separator className="mt-2 mb-4"></Separator>
             <BrandForm />
-            <Separator className="mt-6 mb-4"></Separator>
-            <PageNumberForm />
           </TabsContent>
           <TabsContent
             value={ALL_FORMS.theme.value}
