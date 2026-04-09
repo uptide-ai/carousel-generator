@@ -76,7 +76,7 @@ function ChangeTypeDropdown({
           setOpen(!open);
         }}
       >
-        <ArrowRightLeft className="w-4 h-4" />
+        <ArrowRightLeft className="w-4 h-4 text-muted-foreground" />
       </Button>
       {open && (
         <div
@@ -136,7 +136,7 @@ function ElementMenubar({
   return (
     <div
       className={cn(
-        "flex flex-row gap-0 bg-background rounded-t-md rounded-br-md rounded-bl-none px-1 border border-border shadow-sm",
+        "flex flex-row gap-0 bg-background rounded-md px-1 border border-border",
         className
       )}
     >
@@ -150,7 +150,7 @@ function ElementMenubar({
         className="w-6 h-6"
         disabled={currentElementNumber <= 0 || currentElementNumber > numElements - 1}
       >
-        <ChevronUp className="w-4 h-4" />
+        <ChevronUp className="w-4 h-4 text-muted-foreground" />
       </Button>
       <Button
         onClick={() => {
@@ -163,7 +163,7 @@ function ElementMenubar({
         size="icon"
         className="w-6 h-6"
       >
-        <Copy className="w-4 h-4" />
+        <Copy className="w-4 h-4 text-muted-foreground" />
       </Button>
       <Button
         onClick={() => remove(currentElementNumber)}
@@ -172,7 +172,7 @@ function ElementMenubar({
         size="icon"
         className="w-6 h-6"
       >
-        <Trash className="w-4 h-4" />
+        <Trash className="w-4 h-4 text-muted-foreground" />
       </Button>
       <ChangeTypeDropdown
         currentType={currentType}
@@ -188,7 +188,7 @@ function ElementMenubar({
         className="w-6 h-6"
         disabled={currentElementNumber >= numElements - 1}
       >
-        <ChevronDown className="w-4 h-4" />
+        <ChevronDown className="w-4 h-4 text-muted-foreground" />
       </Button>
     </div>
   );

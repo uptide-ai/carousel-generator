@@ -39,7 +39,8 @@ export function Subtitle({
         className
       )}
       style={{
-        color: config.theme.secondary,
+        color: style.color ?? config.theme.secondary,
+        backgroundColor: style.backgroundColor ?? undefined,
         fontSize: `${style.fontSize ?? Math.round((config.fonts.font1Style?.fontSize ?? 48) * 0.65)}px`,
         fontWeight: config.fonts.font1Style?.fontWeight ?? 700,
         lineHeight: config.fonts.font1Style?.lineHeight ?? 1.3,

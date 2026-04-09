@@ -7,6 +7,52 @@ import {
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { DocumentFormReturn } from "@/lib/document-form-types";
+import { useState, useEffect } from "react";
+
+function NumberInputWithLocalState({
+  value,
+  onChange,
+  min,
+  max,
+  step,
+  defaultValue,
+}: {
+  value: number | undefined;
+  onChange: (v: number) => void;
+  min: number;
+  max: number;
+  step: number;
+  defaultValue?: number;
+}) {
+  const effectiveValue = value ?? defaultValue ?? min;
+  const [localValue, setLocalValue] = useState(String(effectiveValue));
+
+  useEffect(() => {
+    setLocalValue(String(value ?? defaultValue ?? min));
+  }, [value, defaultValue, min]);
+
+  return (
+    <Input
+      type="number"
+      min={min}
+      max={max}
+      step={step}
+      value={localValue}
+      onChange={(e) => setLocalValue(e.target.value)}
+      onBlur={() => {
+        const v = parseFloat(localValue);
+        if (!isNaN(v)) {
+          const clamped = Math.min(max, Math.max(min, v));
+          onChange(clamped);
+          setLocalValue(String(clamped));
+        } else {
+          setLocalValue(String(effectiveValue));
+        }
+      }}
+      className="w-16 h-8 text-center text-sm px-1"
+    />
+  );
+}
 
 export function SliderInputField({
   fieldName,
@@ -44,19 +90,13 @@ export function SliderInputField({
                 onValueChange={(vals) => onChange(vals[0])}
                 className="flex-1"
               />
-              <Input
-                type="number"
+              <NumberInputWithLocalState
+                value={value}
+                onChange={onChange}
                 min={min}
                 max={max}
                 step={step}
-                value={value ?? defaultValue ?? min}
-                onChange={(e) => {
-                  const v = parseFloat(e.target.value);
-                  if (!isNaN(v) && v >= min && v <= max) {
-                    onChange(v);
-                  }
-                }}
-                className="w-16 h-8 text-center text-sm px-1"
+                defaultValue={defaultValue}
               />
             </div>
           </FormControl>

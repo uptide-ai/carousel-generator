@@ -40,7 +40,8 @@ export function Description({
         className
       )}
       style={{
-        color: config.theme.secondary,
+        color: style.color ?? config.theme.secondary,
+        backgroundColor: style.backgroundColor ?? undefined,
         fontSize: `${style.fontSize ?? config.fonts.font2Style?.fontSize ?? 18}px`,
         fontWeight: config.fonts.font2Style?.fontWeight ?? 700,
         lineHeight: config.fonts.font2Style?.lineHeight ?? 1.3,

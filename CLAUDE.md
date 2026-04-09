@@ -11,7 +11,7 @@ Deployed at carouselgenerator.vercel.app.
 - **State**: React Hook Form + Zod validation + React Context
 - **AI**: Anthropic Claude Haiku 4.5 via `@anthropic-ai/sdk` tool use
 - **Export**: html-to-image + jsPDF (PDF) or JSZip (images ZIP)
-- **Carousel UI**: embla-carousel-react
+- **Carousel UI**: CSS Grid (2-row layout, desktop) / flex scroll (mobile)
 - **Package Manager**: pnpm
 
 ## Project Structure
@@ -26,17 +26,17 @@ src/
     globals.css           # CSS vars (shadcn theme tokens)
   components/
     editor.tsx            # Main layout: sidebar + slides area
-    slides-editor.tsx     # Carousel view + AI panel
-    settings-panel.tsx    # Left sidebar with vertical tabs (Settings/Theme/Fonts/File)
-    style-menu.tsx        # Appears when element selected (fontSize, align, bottomSpacing, objectFit, image)
+    slides-editor.tsx     # Grid view of all slides (no AI panel — moved to sidebar)
+    settings-panel.tsx    # Left sidebar with vertical tabs (Settings/Theme/Fonts/AI/File)
+    style-menu.tsx        # Appears when element selected (fontSize, textColor, bgColor, align, bottomSpacing, objectFit, image)
     main-nav.tsx          # Top bar: Pager + download popover (PDF or Images ZIP)
     slide-menubar.tsx     # Per-slide actions: move, clone, delete, per-slide background color
     element-menubar-wrapper.tsx  # Per-element actions: move, clone, delete, change type
-    ai-panel.tsx          # "Format with AI" section
-    ai-textarea-form.tsx  # AI text paste + format button
+    ai-panel.tsx          # "Generate with AI" section (lives in sidebar AI tab)
+    ai-textarea-form.tsx  # AI text paste + format button (sidebar-width layout)
     pager.tsx             # Slide navigation (first/prev/counter/next/last)
     pages/
-      document.tsx        # Renders embla Carousel with all slides
+      document.tsx        # Renders all slides in CSS Grid (2 rows desktop, horizontal scroll mobile)
       common-page.tsx     # Single slide renderer (layers + elements + footer)
       page-base.tsx       # Slide wrapper with sizing
       page-frame.tsx      # Grid container (1fr auto) for slide selection + vertical centering
@@ -60,7 +60,7 @@ src/
       page-number-form.tsx  # Show/hide page numbers toggle (inside Settings tab)
       file-form.tsx       # File tab: export/import settings & content, reset
       fields/
-        slider-input-field.tsx  # Reusable slider + number input combo
+        slider-input-field.tsx  # Reusable slider + number input combo (local state allows typing intermediate values, commits on blur)
         ...                     # Other reusable form field components
     ui/                   # shadcn/ui primitives (button, dialog, tabs, etc.)
   lib/
@@ -126,7 +126,7 @@ Document
 ```
 
 **Element types**: Title, Subtitle, Description, ContentImage, Image
-**Text style** (per-element override): fontSize (8-200px, optional — if unset computed from global), align (Left/Center/Right), paragraphSpacing/bottomSpacing (0-3em)
+**Text style** (per-element override): fontSize (8-200px, optional — if unset computed from global), align (Left/Center/Right), paragraphSpacing/bottomSpacing (0-3em), color (optional hex — overrides theme primary/secondary), backgroundColor (optional hex — highlight behind text)
 **Font style** (global per-font in config.fonts): fontSize (8-200px, default font1=48, font2=18), lineHeight (0.5-4), letterSpacing (-0.1 to 0.5em), fontWeight (100-900), textBalance (boolean → `text-wrap: balance`)
 **Font size proportional scaling**: Title uses global font1 fontSize directly. Subtitle uses font1 fontSize × 0.65. Description uses global font2 fontSize. Per-element fontSize override takes priority over global.
 **Slide padding**: configurable via `config.theme.padding` (0-80px, default 30px) — controls inner padding of all slides
@@ -161,8 +161,10 @@ All state lives in a single React Hook Form instance (`useForm` with `zodResolve
 - **AI animation constants** (in `ai-textarea-form.tsx`): `WORD_DELAY` (ms per word), `ELEMENT_PAUSE`, `SLIDE_PAUSE`, `SLIDES_PER_GROUP` — tune these to adjust typewriter speed and navigation rhythm.
 - **Export modes**: Download button opens popover with PDF (jsPDF) or Images ZIP (JSZip) options. Both use html-to-image canvas pipeline. Image proxy (api/proxy) handles CORS; falls back to window.location.origin if NEXT_PUBLIC_APP_URL not set.
 - **Quick-add (no dialogs)**: "+" for new slide directly creates a Content slide (no type picker dialog). "+" for new element directly adds a Description element (no type picker dialog). Dialog components are commented out but preserved for future use (`new-page-dialog-content.tsx`, `new-element-dialog-content.tsx`). Users change element type after creation via the element menubar's swap button.
-- **Keyboard navigation**: Arrow keys navigate between slides via a global `document` keydown listener in `carousel.tsx`. Listener skips navigation when focus is on a `textarea`, `input`, or `contentEditable` element, allowing normal text cursor movement.
-- **Smart carousel scroll**: `document.tsx` only calls `api.scrollTo()` when the target slide is not already visible (`api.slidesInView()`), preventing annoying jumps when clicking a slide that's already on screen.
+- **Keyboard navigation**: Arrow keys navigate between slides via a `window` keydown listener in `document.tsx`. Listener skips navigation when focus is on a `textarea`, `input`, or `contentEditable` element, allowing normal text cursor movement.
+- **2-row grid layout**: Desktop shows all slides in a CSS Grid with `ceil(numSlides/2)` columns and 2 rows. Scale is computed to fit the available width (window - sidebar - padding). Mobile falls back to a single-row horizontal scroll. The grid container (`docReference`) wraps only slides — "add slide" button is outside for clean PDF export.
+- **No drag scroll**: Embla carousel was replaced with CSS Grid. Slides don't scroll on drag/click — only explicit navigation (arrow keys, pager) changes the active slide.
+- **Per-element color overrides**: Text elements (Title/Subtitle/Description) support optional `color` and `backgroundColor` in their style. Color pickers appear in the StyleMenu when a text element is selected. Reset buttons revert to theme defaults.
 - **Slide vertical layout**: `PageFrame` uses CSS Grid (`grid-template-rows: 1fr auto`) with 3 children: (1) `PageLayout` in the `1fr` row centers elements with `justify-center`, (2) a wrapper div in the `auto` row holds both `AddElement` button and `Footer`. This ensures the "+" button doesn't affect vertical centering of content elements.
 - **Reset all**: Settings tab has a "Reset all" button that calls `form.reset(defaultValues)` + `localStorage.removeItem("documentFormKey")` to start fresh.
 
@@ -219,7 +221,7 @@ After validation, Zod applies default styles (align: "Left", lineHeight: 1.3, et
 ### Key Files
 - `src/lib/langchain.ts` — system prompt, Anthropic SDK client, tool schema, validation, debug logs
 - `src/app/actions.tsx` — server action wrapper with optional rate limiting (Upstash Redis)
-- `src/components/ai-textarea-form.tsx` — textarea for pasting text, calls server action, updates form state
+- `src/components/ai-textarea-form.tsx` — textarea for pasting text, calls server action, updates form state (lives in sidebar AI tab)
 - `src/lib/validation/slide-schema.tsx` — `UnstyledDocumentSchema`, `MultiSlideSchema`
 
 ### Persistence & Images

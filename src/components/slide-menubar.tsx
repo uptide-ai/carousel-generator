@@ -51,7 +51,7 @@ function SlideColorPicker({
   return (
     <div className="relative flex items-center justify-center w-8 h-8" ref={ref}>
       <button
-        className="w-4 h-4 rounded-full border-[1.5px] border-foreground/80 hover:border-foreground cursor-pointer flex-shrink-0"
+        className="w-4 h-4 rounded-full border-[1.75px] border-muted-foreground hover:border-foreground cursor-pointer flex-shrink-0"
         style={{ backgroundColor: displayColor }}
         onClick={(e) => {
           e.stopPropagation();
@@ -147,7 +147,7 @@ export default function SlideMenubar({
   return (
     <div
       className={cn(
-        "flex flex-row gap-0 items-center bg-background rounded-t-md rounded-br-md rounded-bl-none px-1 border",
+        "flex flex-row gap-0 items-center bg-background rounded-md px-1 border",
         className
       )}
     >
@@ -161,7 +161,7 @@ export default function SlideMenubar({
         className="w-8 h-8"
         disabled={currentPage <= 0 || currentPage > numPages - 1}
       >
-        <ChevronLeft className="w-4 h-4" />
+        <ChevronLeft className="w-4 h-4 text-muted-foreground" />
       </Button>
       <SlideColorPicker fieldName={fieldName} />
       <Button
@@ -183,7 +183,7 @@ export default function SlideMenubar({
         className="w-8 h-8"
         size="icon"
       >
-        <Copy className="w-4 h-4" />
+        <Copy className="w-4 h-4 text-muted-foreground" />
       </Button>
       <Button
         onClick={handleExportSlide}
@@ -193,7 +193,7 @@ export default function SlideMenubar({
         size="icon"
         title="Export slide as PNG"
       >
-        <ImageDown className="w-4 h-4" />
+        <ImageDown className="w-4 h-4 text-muted-foreground" />
       </Button>
       <Button
         onClick={() => {
@@ -212,7 +212,7 @@ export default function SlideMenubar({
         className="w-8 h-8"
         size="icon"
       >
-        <Trash className="w-4 h-4" />
+        <Trash className="w-4 h-4 text-muted-foreground" />
       </Button>
       <Button
         onClick={() => {
@@ -224,7 +224,7 @@ export default function SlideMenubar({
         size="icon"
         disabled={currentPage >= numPages - 1}
       >
-        <ChevronRight className="w-4 h-4" />
+        <ChevronRight className="w-4 h-4 text-muted-foreground" />
       </Button>
     </div>
   );

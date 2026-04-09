@@ -21,6 +21,7 @@ import {
   Maximize2,
   MoveHorizontal,
   Expand,
+  X,
 } from "lucide-react";
 import { TextALignType } from "@/lib/validation/text-schema";
 import { OpacityFormField } from "@/components/forms/fields/opacity-form-field";
@@ -48,6 +49,51 @@ const objectFitMap: Record<ObjectFitType, React.ReactElement> = {
   [ObjectFitType.enum.Expand]: <MoveHorizontal className="h-4 w-4" />,
   [ObjectFitType.enum.Fill]: <Expand className="h-4 w-4" />,
 };
+
+function InlineColorPicker({
+  label,
+  value,
+  defaultColor,
+  onChange,
+  onReset,
+}: {
+  label: string;
+  value: string | undefined;
+  defaultColor: string;
+  onChange: (color: string) => void;
+  onReset: () => void;
+}) {
+  const displayColor = value || defaultColor;
+  return (
+    <div className="flex flex-col gap-2 w-full">
+      <span className="text-sm font-medium">{label}</span>
+      <div className="flex items-center gap-2">
+        <input
+          type="color"
+          value={displayColor}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-8 h-8 rounded cursor-pointer border-0 p-0 flex-shrink-0"
+        />
+        <input
+          type="text"
+          value={value || ""}
+          placeholder={defaultColor}
+          onChange={(e) => onChange(e.target.value || defaultColor)}
+          className="flex-1 min-w-0 text-xs px-2 py-1 border rounded bg-background"
+        />
+        {value && (
+          <button
+            className="flex items-center text-muted-foreground hover:text-foreground flex-shrink-0"
+            onClick={onReset}
+            title="Reset"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 export function StyleMenu({
   form,
@@ -80,6 +126,11 @@ export function StyleMenu({
       ? Math.round(globalFont1Size * 0.65)
       : globalFont2Size;
 
+  const defaultTextColor =
+    type === ElementType.enum.Title
+      ? config.theme.primary
+      : config.theme.secondary;
+
   return (
     <div
       className={cn("grid gap-4", className)}
@@ -108,6 +159,24 @@ export function StyleMenu({
             defaultValue={effectiveFontSize}
             className="w-full"
           />
+        ) : null}
+        {isTextElement ? (
+          <>
+            <InlineColorPicker
+              label="Text Color"
+              value={(style as any).color}
+              defaultColor={defaultTextColor}
+              onChange={(c) => form.setValue(`${stylePath}.color` as any, c)}
+              onReset={() => form.setValue(`${stylePath}.color` as any, undefined)}
+            />
+            <InlineColorPicker
+              label="Background Color"
+              value={(style as any).backgroundColor}
+              defaultColor="#ffffff"
+              onChange={(c) => form.setValue(`${stylePath}.backgroundColor` as any, c)}
+              onReset={() => form.setValue(`${stylePath}.backgroundColor` as any, undefined)}
+            />
+          </>
         ) : null}
         {style && Object.hasOwn(style, "align") ? (
           <EnumRadioGroupField

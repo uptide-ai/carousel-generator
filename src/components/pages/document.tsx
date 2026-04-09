@@ -5,113 +5,170 @@ import { DocumentSchema } from "@/lib/validation/document-schema";
 import { SIZE } from "@/lib/page-size";
 import { usePagerContext } from "@/lib/providers/pager-context";
 import { cn } from "@/lib/utils";
-import { NewPage } from "@/components/pages/new-page";
 import {
   SlideFieldPath,
   SlidesFieldArrayReturn,
 } from "@/lib/document-form-types";
 import { SlideType } from "@/lib/validation/slide-schema";
+import { Plus } from "lucide-react";
 
 import { getDefaultSlideOfType } from "@/lib/default-slides";
 import { useFieldArrayValues } from "@/lib/hooks/use-field-array-values";
 import { useRefContext } from "@/lib/providers/reference-context";
 import { CommonPage } from "@/components/pages/common-page";
 import SlideMenubarWrapper from "@/components/slide-menubar-wrapper";
+import { Button } from "@/components/ui/button";
 
-import {
-  Carousel,
-  CarouselApi,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
+const PAGE_GAP_PX = 14;
+const MENUBAR_HEIGHT = 40; // matches -top-10 (2.5rem) on menubar
+const ROW_GAP_PX = 20;
+const ADD_BUTTON_SIZE = 56; // w-14
+const ADD_BUTTON_GAP = 14;
 
 export function Document({
   document,
   slidesFieldArray,
   scale,
+  isMobile,
 }: {
   document: z.infer<typeof DocumentSchema>;
   slidesFieldArray: SlidesFieldArrayReturn;
   scale: number;
+  isMobile: boolean;
 }) {
   const docReference = useRefContext();
-  const [api, setApi] = React.useState<CarouselApi>();
 
-  const { currentPage, forceScroll } = usePagerContext();
+  const { currentPage, setCurrentPage } = usePagerContext();
   const { numPages } = useFieldArrayValues("slides");
 
-  const PAGE_GAP_PX = 8;
-  const PADDING_TOP = 48;
-  const PADDING_BOTTOM = 48;
-  const SLIDE_PADDING_X = 8;
-
-  const { append, prepend } = slidesFieldArray;
-  const newPageAsSideButton = numPages > 0;
+  const { append } = slidesFieldArray;
 
   const fieldName = "slides";
 
-  useEffect(() => {
-    if (api) {
-      const NEW_PAGE_BUTTON_OFFSET = 1;
-      const target = currentPage + NEW_PAGE_BUTTON_OFFSET;
-      const visible = api.slidesInView();
-      if (forceScroll || !visible.includes(target)) {
-        api.scrollTo(target);
-      }
-    }
-  }, [currentPage, forceScroll, api]);
+  const cols = numPages <= 1 ? 1 : Math.ceil(numPages / 2);
+  const rows = numPages <= 1 ? 1 : Math.min(2, numPages);
 
-  return (
-    <div className=" flex flex-row justify-center w-full">
-      <Carousel
-        setApi={setApi}
-        opts={{
-          align: "start",
-        }}
-        className="w-full sm:w-4/5 min-w-[400px]"
-        style={{
-          transform: `scale(${scale})`,
-          transformOrigin: "top",
-          minWidth: `${400 + SLIDE_PADDING_X * 2}px`,
-          height: scale * (SIZE.height + PADDING_TOP + PADDING_BOTTOM),
-        }}
-      >
-        <CarouselContent
-          ref={docReference}
-          id="element-to-download-as-pdf"
-          className="-ml-2 md:-ml-4 flex-1"
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target as HTMLElement;
+      const tagName = target.tagName.toLowerCase();
+      if (
+        tagName === "textarea" ||
+        tagName === "input" ||
+        target.isContentEditable
+      ) {
+        return;
+      }
+
+      if (event.key === "ArrowLeft" && currentPage > 0) {
+        event.preventDefault();
+        setCurrentPage(currentPage - 1);
+      } else if (event.key === "ArrowRight" && currentPage < numPages - 1) {
+        event.preventDefault();
+        setCurrentPage(currentPage + 1);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentPage, numPages, setCurrentPage]);
+
+  const slideHeight = SIZE.height + MENUBAR_HEIGHT;
+
+  if (isMobile) {
+    return (
+      <div className="flex flex-col items-center w-full">
+        <div
+          className="flex overflow-x-auto w-full items-start gap-2 pb-2"
           style={{
-            paddingTop: PADDING_TOP,
-            paddingBottom: PADDING_BOTTOM,
+            transform: `scale(${scale})`,
+            transformOrigin: "top left",
+            height: scale * (slideHeight + 8),
           }}
         >
-          <CarouselItem
-            className="pl-2 md:pl-4 "
-            id={"add-slide-1"}
-            style={{
-              flex: `0 0 ${SIZE.width / 4 + PAGE_GAP_PX}px`,
-            }}
+          <div
+            ref={docReference}
+            id="element-to-download-as-pdf"
+            className="flex gap-2"
           >
-            <NewPage
-              size={SIZE}
-              className="px-2"
-              handleAddPage={(pageType: SlideType) => {
-                // TODO: Should add with index at different locations and set as current page the index
-                prepend(getDefaultSlideOfType(pageType));
-              }}
-              isSideButton={newPageAsSideButton}
-            />
-          </CarouselItem>
+            {document.slides.map((slide, index) => (
+              <div
+                key={fieldName + "." + index}
+                id={`carousel-item-${index}`}
+              >
+                <SlideMenubarWrapper
+                  className="w-fit"
+                  slidesFieldArray={slidesFieldArray}
+                  fieldName={(fieldName + "." + index) as SlideFieldPath}
+                >
+                  <CommonPage
+                    config={document.config}
+                    slide={slide}
+                    index={index}
+                    size={SIZE}
+                    fieldName={(fieldName + "." + index) as SlideFieldPath}
+                    className={cn(
+                      currentPage != index &&
+                        "hover:brightness-90 hover:cursor-pointer"
+                    )}
+                  />
+                </SlideMenubarWrapper>
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center self-center" id="add-slide-1">
+            <Button
+              variant="outline"
+              className="rounded-full w-7 h-7 p-0 bg-background/60 hover:bg-background/90 border border-border/50 shadow-sm"
+              onClick={() => append(getDefaultSlideOfType(SlideType.enum.Content))}
+            >
+              <Plus className="w-3.5 h-3.5 text-muted-foreground" />
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const gridHeight =
+    rows * slideHeight + (rows > 1 ? ROW_GAP_PX : 0);
+
+  const gridWidth = cols * SIZE.width + (cols - 1) * PAGE_GAP_PX;
+  const totalWidth = gridWidth + ADD_BUTTON_GAP + ADD_BUTTON_SIZE;
+
+  // Position add button vertically centered with the 2nd row (or 1st if single row)
+  const buttonTop =
+    rows === 2
+      ? slideHeight + ROW_GAP_PX + (slideHeight - ADD_BUTTON_SIZE) / 2
+      : (slideHeight - ADD_BUTTON_SIZE) / 2;
+
+  return (
+    <div className="flex flex-col items-center w-full">
+      <div
+        className="relative"
+        style={{
+          transform: `scale(${scale})`,
+          transformOrigin: "top center",
+          height: scale * gridHeight,
+          width: totalWidth,
+        }}
+      >
+        <div
+          ref={docReference}
+          id="element-to-download-as-pdf"
+          className="grid"
+          style={{
+            gridTemplateColumns: `repeat(${cols}, ${SIZE.width}px)`,
+            columnGap: PAGE_GAP_PX,
+            rowGap: ROW_GAP_PX,
+          }}
+        >
           {document.slides.map((slide, index) => (
-            <CarouselItem
+            <div
               key={fieldName + "." + index}
-              className="pl-2 md:pl-4"
               id={`carousel-item-${index}`}
-              style={{
-                flex: `0 0 ${SIZE.width + PAGE_GAP_PX}px`,
-              }}
+              style={{ paddingTop: MENUBAR_HEIGHT }}
             >
               <SlideMenubarWrapper
                 className="w-fit"
@@ -130,39 +187,19 @@ export function Document({
                   )}
                 />
               </SlideMenubarWrapper>
-            </CarouselItem>
+            </div>
           ))}
-          <CarouselItem
-            className="pl-2 md:pl-4 "
-            id={"add-slide-2"}
-            style={{
-              flex: `0 0 ${SIZE.width / 4 + PAGE_GAP_PX}px`,
-            }}
-          >
-            <NewPage
-              size={SIZE}
-              className="px-2"
-              handleAddPage={(pageType: SlideType) => {
-                // TODO: Should add with index at different locations and set as current page the index
-                append(getDefaultSlideOfType(pageType));
-              }}
-              isSideButton={newPageAsSideButton}
-            />
-          </CarouselItem>
-        </CarouselContent>
-        <CarouselPrevious
-          className="sm:-left-12 -left-4"
-          style={{
-            transform: `scale(${1 / scale})`,
-          }}
-        />
-        <CarouselNext
-          className="sm:-right-12 -right-4"
-          style={{
-            transform: `scale(${1 / scale})`,
-          }}
-        />
-      </Carousel>
+        </div>
+        <Button
+          id="add-slide-1"
+          className="rounded-full w-14 h-14 p-0 bg-background/60 hover:bg-background/90 border border-border/50 shadow-sm absolute"
+          style={{ right: 0, top: buttonTop }}
+          variant="outline"
+          onClick={() => append(getDefaultSlideOfType(SlideType.enum.Content))}
+        >
+          <Plus className="w-5 h-5 text-muted-foreground" />
+        </Button>
+      </div>
     </div>
   );
 }

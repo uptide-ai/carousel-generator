@@ -130,7 +130,7 @@ export function AITextAreaForm() {
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className="max-w-lg w-full m-auto"
+        className="w-full"
       >
         <FormField
           control={form.control}
@@ -139,11 +139,10 @@ export function AITextAreaForm() {
             <FormItem>
               <FormLabel></FormLabel>
               <FormControl>
-                <div className="flex flex-col gap-2 w-full" style={{ maxWidth: 650 }}>
+                <div className="flex flex-col gap-2 w-full">
                   <Textarea
                     placeholder="Cole seu texto aqui para organizar em slides..."
-                    className="w-full overflow-y-auto"
-                    style={{ height: 300 }}
+                    className="w-full overflow-y-auto min-h-[200px]"
                     {...field}
                   />
                   {isAnimating ? (

@@ -24,6 +24,7 @@ import {
   LucideIcon,
   Palette,
   Plus,
+  Sparkles,
   Type,
 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
@@ -39,6 +40,7 @@ import { StyleMenu } from "@/components/style-menu";
 import { useFormContext } from "react-hook-form";
 import { DocumentFormReturn } from "@/lib/document-form-types";
 import { FileForm } from "@/components/forms/file-form";
+import { AIPanel } from "@/components/ai-panel";
 
 type TabInfo = {
   name: string;
@@ -61,6 +63,11 @@ const ALL_FORMS: Record<string, TabInfo> = {
     name: "Fonts",
     value: "fonts",
     icon: Type,
+  },
+  ai: {
+    name: "AI",
+    value: "ai",
+    icon: Sparkles,
   },
   file: {
     name: "File",
@@ -161,6 +168,7 @@ export function SidebarTabsPanel() {
             <VerticalTabTriggerButton tabInfo={ALL_FORMS.settings} />
             <VerticalTabTriggerButton tabInfo={ALL_FORMS.theme} />
             <VerticalTabTriggerButton tabInfo={ALL_FORMS.fonts} />
+            <VerticalTabTriggerButton tabInfo={ALL_FORMS.ai} />
             <VerticalTabTriggerButton tabInfo={ALL_FORMS.file} />
           </VerticalTabsList>
         </ScrollArea>
@@ -204,6 +212,12 @@ export function SidebarTabsPanel() {
             <FontsForm />
           </VerticalTabsContent>
           <VerticalTabsContent
+            value={ALL_FORMS.ai.value}
+            className="mt-0 border-0 p-0 m-4"
+          >
+            <AIPanel />
+          </VerticalTabsContent>
+          <VerticalTabsContent
             value={ALL_FORMS.file.value}
             className="mt-0 border-0 p-0 m-4"
           >
@@ -234,10 +248,11 @@ export function DrawerFormsPanel({ className }: { className: string }) {
     >
       <div className="flex flex-col h-full ">
         <ScrollArea className=" border-b h-full bg-muted">
-          <TabsList className="grid grid-cols-4 gap-2 h-20 rounded-none">
+          <TabsList className="grid grid-cols-5 gap-2 h-20 rounded-none">
             <HorizontalTabTriggerButton tabInfo={ALL_FORMS.settings} />
             <HorizontalTabTriggerButton tabInfo={ALL_FORMS.theme} />
             <HorizontalTabTriggerButton tabInfo={ALL_FORMS.fonts} />
+            <HorizontalTabTriggerButton tabInfo={ALL_FORMS.ai} />
             <HorizontalTabTriggerButton tabInfo={ALL_FORMS.file} />
           </TabsList>
         </ScrollArea>
@@ -265,6 +280,12 @@ export function DrawerFormsPanel({ className }: { className: string }) {
             <h4 className="text-xl font-semibold">{ALL_FORMS.fonts.name}</h4>
             <Separator className="mt-2 mb-4"></Separator>
             <FontsForm />
+          </TabsContent>
+          <TabsContent
+            value={ALL_FORMS.ai.value}
+            className="mt-0 border-0 p-0 m-4"
+          >
+            <AIPanel />
           </TabsContent>
           <TabsContent
             value={ALL_FORMS.file.value}

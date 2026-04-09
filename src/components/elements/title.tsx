@@ -42,7 +42,8 @@ export function Title({
         className
       )}
       style={{
-        color: config.theme.primary,
+        color: style.color ?? config.theme.primary,
+        backgroundColor: style.backgroundColor ?? undefined,
         fontSize: `${style.fontSize ?? config.fonts.font1Style?.fontSize ?? 48}px`,
         fontWeight: config.fonts.font1Style?.fontWeight ?? 700,
         lineHeight: config.fonts.font1Style?.lineHeight ?? 1.3,

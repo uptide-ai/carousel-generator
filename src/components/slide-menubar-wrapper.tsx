@@ -26,11 +26,11 @@ export default function SlideMenubarWrapper({
 
   // const { remove, swap, insert } = slidesFieldArray;
   return (
-    <div className="relative w-fit px-2" id={"slide-wrapper-" + fieldName}>
+    <div className="relative w-fit" id={"slide-wrapper-" + fieldName}>
       <div
         id={`slide-menubar-${fieldName}`}
         className={cn(
-          "absolute -top-10 right-0 ",
+          "absolute -top-10 left-1/2 -translate-x-1/2",
           // currentSelection != fieldName && "hidden",
           className
         )}
@@ -38,7 +38,6 @@ export default function SlideMenubarWrapper({
         <SlideMenubar
           slidesFieldArray={slidesFieldArray}
           fieldName={fieldName}
-          className="mr-2"
         />
       </div>
       {children}

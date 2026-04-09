@@ -4,7 +4,7 @@ import { SIZE } from "@/lib/page-size";
 import { useFieldArrayValues } from "@/lib/hooks/use-field-array-values";
 import { useFormContext } from "react-hook-form";
 import { DocumentFormReturn } from "@/lib/document-form-types";
-import { toCanvas } from "html-to-image";
+import { toCanvas, toPng } from "html-to-image";
 import { Options as HtmlToImageOptions } from "html-to-image/lib/types";
 import { jsPDF, jsPDFOptions } from "jspdf";
 import JSZip from "jszip";
@@ -217,12 +217,19 @@ export function useComponentPrinter() {
         const pdf = canvasToPdf(canvas, options);
         pdf.save(filename);
       } else {
-        const images = canvasToImages(canvas, numPages, 0.98);
+        // Render each slide individually for best quality (same as single-slide export)
+        const slideElements = Array.from(
+          html.querySelectorAll('[id^="page-base-"]')
+        ) as HTMLElement[];
         const zip = new JSZip();
-        images.forEach((dataUrl, i) => {
+        for (let i = 0; i < slideElements.length; i++) {
+          const dataUrl = await toPng(slideElements[i], {
+            canvasWidth: SIZE.width * SCALE_TO_LINKEDIN_INTRINSIC_SIZE,
+            canvasHeight: SIZE.height * SCALE_TO_LINKEDIN_INTRINSIC_SIZE,
+          });
           const blob = dataUrlToBlob(dataUrl);
           zip.file(`${filename}-${i + 1}.png`, blob);
-        });
+        }
         const zipBlob = await zip.generateAsync({ type: "blob" });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(zipBlob);
@@ -234,11 +241,52 @@ export function useComponentPrinter() {
   });
 
   const handlePrint = React.useCallback(
-    (mode: ExportMode) => {
-      exportModeRef.current = mode;
-      handleExport();
+    async (mode: ExportMode) => {
+      if (mode === "images") {
+        // Render each slide directly from live DOM (same path as single-slide export)
+        setIsPrinting(true);
+        try {
+          const filename = watch("filename");
+          const SCALE = 1.8;
+          const zip = new JSZip();
+          for (let i = 0; i < numPages; i++) {
+            const element = document.getElementById(`page-base-${i}`);
+            if (!element) continue;
+            const dataUrl = await toPng(element, {
+              canvasWidth: SIZE.width * SCALE,
+              canvasHeight: SIZE.height * SCALE,
+              filter: (node: Node) => {
+                if (node instanceof HTMLElement) {
+                  const id = node.id || "";
+                  if (
+                    id.startsWith("add-element-") ||
+                    id.startsWith("element-menubar-")
+                  )
+                    return false;
+                }
+                return true;
+              },
+            });
+            const blob = dataUrlToBlob(dataUrl);
+            zip.file(`${filename}-${i + 1}.png`, blob);
+          }
+          const zipBlob = await zip.generateAsync({ type: "blob" });
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(zipBlob);
+          link.download = `${filename}.zip`;
+          link.click();
+          URL.revokeObjectURL(link.href);
+        } catch (err) {
+          console.error("Failed to export images:", err);
+        } finally {
+          setIsPrinting(false);
+        }
+      } else {
+        exportModeRef.current = mode;
+        handleExport();
+      }
     },
-    [handleExport]
+    [handleExport, numPages, watch, setIsPrinting]
   );
 
   return {
@@ -279,6 +327,13 @@ function removeAllById(html: HTMLElement, id: string) {
 function removePaddingStyleById(html: HTMLElement, id: string) {
   const classNames = "pl-2 md:pl-4";
   removeStyleById(html, id, classNames);
+  // Also clear inline padding (e.g. paddingTop used for menubar space)
+  const elements = Array.from(
+    html.querySelectorAll(`[id^=${id}]`)
+  ) as HTMLDivElement[];
+  elements.forEach((element) => {
+    element.style.paddingTop = "";
+  });
 }
 
 function removeSelectionStyleById(html: HTMLElement, id: string) {

@@ -10,11 +10,9 @@ import {
   DocumentFormReturn,
   TextTextFieldPath,
 } from "@/lib/document-form-types";
-import { getParent, getSlideNumber } from "@/lib/field-path";
-import { usePagerContext } from "@/lib/providers/pager-context";
+import { getParent } from "@/lib/field-path";
 import { useSelectionContext } from "@/lib/providers/selection-context";
 import { CSSProperties } from "react";
-import { set } from "zod";
 
 export function TextAreaFormField({
   form,
@@ -32,8 +30,6 @@ export function TextAreaFormField({
   style?: CSSProperties;
 }) {
   const { setCurrentSelection } = useSelectionContext();
-  const { setCurrentPage } = usePagerContext();
-  const pageNumber = getSlideNumber(fieldName);
 
   return (
     <FormField
@@ -50,7 +46,6 @@ export function TextAreaFormField({
               {...field}
               onFocus={(event) => {
                 setCurrentSelection(getParent(fieldName), event);
-                setCurrentPage(pageNumber);
               }}
               onClick={(event) => {
                 event.stopPropagation();
