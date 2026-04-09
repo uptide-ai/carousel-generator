@@ -148,6 +148,16 @@ export function StyleMenu({
       </div>
       <Separator orientation="horizontal"></Separator>
       <div className="flex flex-col gap-6 items-start">
+        {style && Object.hasOwn(style, "align") ? (
+          <EnumRadioGroupField
+            name="Alignment"
+            form={form}
+            fieldName={`${stylePath}.align` as TextStyleAlignFieldPath}
+            enumValueElements={textAlignMap}
+            groupClassName="grid grid-cols-3 gap-1"
+            itemClassName="h-10 w-10"
+          />
+        ) : null}
         {isTextElement ? (
           <SliderInputField
             fieldName={`${stylePath}.fontSize`}
@@ -178,16 +188,6 @@ export function StyleMenu({
             />
           </>
         ) : null}
-        {style && Object.hasOwn(style, "align") ? (
-          <EnumRadioGroupField
-            name="Alignment"
-            form={form}
-            fieldName={`${stylePath}.align` as TextStyleAlignFieldPath}
-            enumValueElements={textAlignMap}
-            groupClassName="grid grid-cols-3 gap-1"
-            itemClassName="h-10 w-10"
-          />
-        ) : null}
         {style && Object.hasOwn(style, "paragraphSpacing") ? (
           <SliderInputField
             fieldName={`${stylePath}.paragraphSpacing`}
@@ -198,6 +198,19 @@ export function StyleMenu({
             step={0.1}
             className="w-full"
           />
+        ) : null}
+        {type == ElementType.enum.Image ||
+        type == ElementType.enum.ContentImage ? (
+          <>
+            <div className="w-full flex flex-col gap-3">
+              <h4 className="text-base font-semibold">Image</h4>
+              <TypographyFieldName>Source</TypographyFieldName>
+              <ImageSourceFormField
+                fieldName={`${elementPath}.source` as ImageSourceFieldPath}
+                form={form}
+              />
+            </div>
+          </>
         ) : null}
         {style && Object.hasOwn(style, "objectFit") ? (
           <EnumRadioGroupField
@@ -222,18 +235,18 @@ export function StyleMenu({
             className="w-full"
           />
         ) : null}
-        {type == ElementType.enum.Image ||
-        type == ElementType.enum.ContentImage ? (
-          <>
-            <div className="w-full flex flex-col gap-3">
-              <h4 className="text-base font-semibold">Image</h4>
-              <TypographyFieldName>Source</TypographyFieldName>
-              <ImageSourceFormField
-                fieldName={`${elementPath}.source` as ImageSourceFieldPath}
-                form={form}
-              />
-            </div>
-          </>
+        {type === ElementType.enum.ContentImage &&
+        style && "objectFit" in style && style.objectFit !== "Contain" ? (
+          <SliderInputField
+            fieldName={`${stylePath}.objectPosition`}
+            form={form}
+            label="Vertical Position"
+            min={0}
+            max={100}
+            step={1}
+            defaultValue={50}
+            className="w-full"
+          />
         ) : null}
         {style && Object.hasOwn(style, "opacity") ? (
           <>

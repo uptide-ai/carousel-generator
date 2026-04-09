@@ -33,6 +33,7 @@ export function PageBase({
         height: `${size.height}px`,
         minWidth: `${size.width}px`,
         minHeight: `${size.height}px`,
+        overflowClipMargin: "40px",
       }}
     >
       {children}

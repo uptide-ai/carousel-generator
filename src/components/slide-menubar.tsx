@@ -49,16 +49,22 @@ function SlideColorPicker({
   }, [open]);
 
   return (
-    <div className="relative flex items-center justify-center w-8 h-8" ref={ref}>
-      <button
-        className="w-4 h-4 rounded-full border-[1.75px] border-muted-foreground hover:border-foreground cursor-pointer flex-shrink-0"
-        style={{ backgroundColor: displayColor }}
+    <div className="relative" ref={ref}>
+      <Button
+        variant="ghost"
+        size="icon"
+        className="w-8 h-8"
         onClick={(e) => {
           e.stopPropagation();
           setOpen(!open);
         }}
         title="Slide background color"
-      />
+      >
+        <span
+          className="w-4 h-4 rounded-full flex-shrink-0 pointer-events-none"
+          style={{ backgroundColor: displayColor, border: '1.75px solid hsl(var(--muted-foreground))' }}
+        />
+      </Button>
       {open && (
         <div
           className="absolute top-full right-0 mt-1 rounded-md border bg-popover p-3 shadow-md z-50"

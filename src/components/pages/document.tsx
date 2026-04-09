@@ -182,8 +182,7 @@ export function Document({
                   size={SIZE}
                   fieldName={(fieldName + "." + index) as SlideFieldPath}
                   className={cn(
-                    currentPage != index &&
-                      "hover:brightness-90 hover:cursor-pointer"
+                    currentPage != index && "hover:cursor-pointer"
                   )}
                 />
               </SlideMenubarWrapper>

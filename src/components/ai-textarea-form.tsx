@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -35,7 +34,7 @@ const ELEMENT_PAUSE = 80; // ms pause between elements
 const SLIDE_PAUSE = 150; // ms pause between slides
 const SLIDES_PER_GROUP = 3; // navigate every N slides
 
-export function AITextAreaForm() {
+export function AITextAreaForm({ modelId }: { modelId: string }) {
   const { setValue, watch }: DocumentFormReturn = useFormContext();
   const template = watch("config.template") ?? "default";
   const { setCurrentPage, scrollToPage } = usePagerContext();
@@ -67,7 +66,7 @@ export function AITextAreaForm() {
       new Promise((r) => setTimeout(r, ms));
 
     for (let s = 0; s < slides.length; s++) {
-      if (cancelRef.current) return;
+      if (cancelRef.current) break;
 
       // Navigate to first slide of each new group
       if (s % SLIDES_PER_GROUP === 0) {
@@ -77,7 +76,7 @@ export function AITextAreaForm() {
       await delay(SLIDE_PAUSE);
 
       for (let e = 0; e < slides[s].elements.length; e++) {
-        if (cancelRef.current) return;
+        if (cancelRef.current) break;
         const element = slides[s].elements[e];
         if (!("text" in element)) continue;
 
@@ -85,10 +84,7 @@ export function AITextAreaForm() {
         const words = fullText.split(/(\s+)/); // split keeping whitespace
         let built = "";
         for (const word of words) {
-          if (cancelRef.current) {
-            setValue(`slides.${s}.elements.${e}.text`, fullText);
-            break;
-          }
+          if (cancelRef.current) break;
           built += word;
           // Only delay on actual words, not whitespace
           if (word.trim()) {
@@ -100,7 +96,7 @@ export function AITextAreaForm() {
       }
     }
 
-    // Ensure all text is fully set (in case of timing edge cases)
+    // Always set final state — covers both normal completion and skip
     setValue("slides", slides);
     setCurrentPage(0);
   }
@@ -109,7 +105,7 @@ export function AITextAreaForm() {
     setIsLoading(true);
     cancelRef.current = false;
 
-    const generatedSlides = await generateCarouselSlidesAction(data.prompt, template);
+    const generatedSlides = await generateCarouselSlidesAction(data.prompt, template, modelId);
 
     if (generatedSlides) {
       setIsLoading(false);

@@ -15,12 +15,11 @@ type InputTitleProps = {
 const AutoTextarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
   ({ className, ...props }, ref) => {
     return (
-      <div className="w-full">
+      <div className="w-full rounded-md ring-offset-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
         {/* @ts-ignore Style works ok */}
         <TextareaAutosize
-          // TODO: Auto text area includes some kind of margin or letter spacing, specially on the bottom
           className={cn(
-            "w-full rounded-md outline outline-transparent hover:outline-input outline-2 bg-transparent text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 overflow-hidden resize-none p-0",
+            "w-full rounded-md bg-transparent text-sm placeholder:text-muted-foreground focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 overflow-hidden resize-none p-0",
             className
           )}
           {...props}

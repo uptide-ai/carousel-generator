@@ -19,7 +19,7 @@ export default function Editor({}: {}) {
           handlePrint={handlePrint}
           isPrinting={isPrinting}
         />
-        <div className="flex-1 flex flex-start  md:grid md:grid-cols-[320px_minmax(0,1fr)] ">
+        <div className="flex-1 flex flex-start  md:grid md:grid-cols-[350px_minmax(0,1fr)] ">
           <SidebarPanel />
           <SlidesEditor />
         </div>

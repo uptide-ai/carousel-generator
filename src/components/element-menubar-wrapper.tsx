@@ -1,5 +1,4 @@
 "use client";
-import { Button } from "@/components/ui/button";
 import { useFormContext } from "react-hook-form";
 import {
   Copy,
@@ -67,17 +66,15 @@ function ChangeTypeDropdown({
 
   return (
     <div className="relative" ref={ref}>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="w-6 h-6"
+      <button
+        className="inline-flex items-center justify-center w-6 h-6 disabled:pointer-events-none disabled:opacity-50"
         onClick={(e) => {
           e.stopPropagation();
           setOpen(!open);
         }}
       >
         <ArrowRightLeft className="w-4 h-4 text-muted-foreground" />
-      </Button>
+      </button>
       {open && (
         <div
           className="absolute bottom-full right-0 mb-1 w-32 rounded-md border bg-popover p-1 shadow-md z-50"
@@ -140,56 +137,48 @@ function ElementMenubar({
         className
       )}
     >
-      <Button
+      <button
         onClick={() => {
           swap(currentElementNumber, currentElementNumber - 1);
           setCurrentSelection(`${parentPath}.${currentElementNumber - 1}` as ElementFieldPath, null);
         }}
-        variant="ghost"
-        size="icon"
-        className="w-6 h-6"
+        className="inline-flex items-center justify-center w-6 h-6 disabled:pointer-events-none disabled:opacity-50"
         disabled={currentElementNumber <= 0 || currentElementNumber > numElements - 1}
       >
         <ChevronUp className="w-4 h-4 text-muted-foreground" />
-      </Button>
-      <Button
+      </button>
+      <button
         onClick={() => {
           const insertPosition = currentElementNumber;
           const values = JSON.parse(JSON.stringify(currentElementValue));
           insert(insertPosition, values);
         }}
         disabled={currentElementNumber == 0 && numElements == 0}
-        variant="ghost"
-        size="icon"
-        className="w-6 h-6"
+        className="inline-flex items-center justify-center w-6 h-6 disabled:pointer-events-none disabled:opacity-50"
       >
         <Copy className="w-4 h-4 text-muted-foreground" />
-      </Button>
-      <Button
+      </button>
+      <button
         onClick={() => remove(currentElementNumber)}
         disabled={currentElementNumber == 0 && numElements == 0}
-        variant="ghost"
-        size="icon"
-        className="w-6 h-6"
+        className="inline-flex items-center justify-center w-6 h-6 disabled:pointer-events-none disabled:opacity-50"
       >
         <Trash className="w-4 h-4 text-muted-foreground" />
-      </Button>
+      </button>
       <ChangeTypeDropdown
         currentType={currentType}
         onChangeType={handleChangeType}
       />
-      <Button
+      <button
         onClick={() => {
           swap(currentElementNumber, currentElementNumber + 1);
           setCurrentSelection(`${parentPath}.${currentElementNumber + 1}` as ElementFieldPath, null);
         }}
-        variant="ghost"
-        size="icon"
-        className="w-6 h-6"
+        className="inline-flex items-center justify-center w-6 h-6 disabled:pointer-events-none disabled:opacity-50"
         disabled={currentElementNumber >= numElements - 1}
       >
         <ChevronDown className="w-4 h-4 text-muted-foreground" />
-      </Button>
+      </button>
     </div>
   );
 }
@@ -217,7 +206,7 @@ const ElementMenubarWrapper = React.forwardRef<
       <div
         id={`element-menubar-${fieldName}`}
         className={cn(
-          "flex flex-row absolute -top-9 right-0 z-10",
+          "flex flex-row absolute -top-9 right-0 z-50",
           currentSelection != fieldName && "hidden",
           className
         )}

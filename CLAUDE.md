@@ -9,7 +9,7 @@ Deployed at carouselgenerator.vercel.app.
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS + shadcn/ui (Radix primitives)
 - **State**: React Hook Form + Zod validation + React Context
-- **AI**: Anthropic Claude Haiku 4.5 via `@anthropic-ai/sdk` tool use
+- **AI**: OpenRouter API (multi-model: Gemini 3 Flash, Claude Haiku 4.5) via OpenAI-compatible tool use
 - **Export**: html-to-image + jsPDF (PDF) or JSZip (images ZIP)
 - **Carousel UI**: CSS Grid (2-row layout, desktop) / flex scroll (mobile)
 - **Package Manager**: pnpm
@@ -102,7 +102,8 @@ src/
     default-document.tsx  # Default doc with 5 slides (Intro, 3 Content, Outro)
     default-slides.tsx    # Template slides per type
     convert-file.tsx      # File → base64 data URL conversion
-    langchain.ts          # Anthropic Claude SDK + carousel generation prompt
+    ai-models.ts          # AI model definitions (OpenRouter model IDs, per-model config)
+    langchain.ts          # OpenRouter API client + carousel generation prompt
 ```
 
 ## Data Model
@@ -171,23 +172,23 @@ All state lives in a single React Hook Form instance (`useForm` with `zodResolve
 ## AI Formatting (Format with AI)
 
 ### Flow
-1. User pastes text in `AITextAreaForm` → sent directly to server action (text is passed as-is)
-3. Claude Haiku 4.5 responds via **tool use** (`carouselCreator` tool) with structured JSON
+1. User pastes text in `AITextAreaForm` → selects model from dropdown → sent to server action with modelId
+3. Selected model responds via **tool use** (`carouselCreator` tool) with structured JSON (OpenAI-compatible format via OpenRouter)
 4. Response validated against `UnstyledDocumentSchema` (Zod safeParse)
 5. Valid output transformed to `MultiSlideSchema` (adds default styles: fontSize, align, etc.)
 6. **Simulated streaming animation**: slides are created with empty text, then filled word-by-word via `setValue` calls with delays (typewriter effect). Carousel auto-navigates in groups of 3 slides (`SLIDES_PER_GROUP`). "Skip Animation" button allows jumping to final result instantly.
 7. UI re-renders, localStorage auto-saves
 
 ### How the AI knows the schema
-- `zodToJsonSchema()` converts Zod schemas into JSON Schema sent as the tool's `input_schema`
+- `zodToJsonSchema()` converts Zod schemas into JSON Schema sent as the tool's `parameters`
 - `z.string().max(160)` becomes `"maxLength": 160` in JSON Schema
 - `z.discriminatedUnion` becomes `anyOf` with `$ref` to each element type
-- `tool_choice: { type: "tool", name: "carouselCreator" }` forces Claude to respond in this exact format
+- `tool_choice: { type: "function", function: { name: "carouselCreator" } }` forces the model to respond in this exact format (OpenAI tool_choice format)
 
 ### Security
 - System prompt, tool schema, and raw AI response are **server-side only** — never sent to the browser
 - Browser only sees the user's own input and the final parsed slides array
-- API key is in `ANTHROPIC_API_KEY` env var, never exposed to client
+- API key is in `OPENROUTER_API_KEY` env var, never exposed to client
 
 ### Debug logging
 - `langchain.ts` has collapsible `console.groupCollapsed("[AI] Request/Response")` logs
@@ -219,9 +220,11 @@ After validation, Zod applies default styles (align: "Left", lineHeight: 1.3, et
 - **8-15 slides** per formatting, 2-3 elements per slide
 
 ### Key Files
-- `src/lib/langchain.ts` — system prompt, Anthropic SDK client, tool schema, validation, debug logs
-- `src/app/actions.tsx` — server action wrapper with optional rate limiting (Upstash Redis)
-- `src/components/ai-textarea-form.tsx` — textarea for pasting text, calls server action, updates form state (lives in sidebar AI tab)
+- `src/lib/ai-models.ts` — model definitions (OpenRouter IDs, display names, per-model extraBody like reasoning effort)
+- `src/lib/langchain.ts` — system prompt, OpenRouter API client (fetch), tool schema, validation, debug logs
+- `src/app/actions.tsx` — server action wrapper with model selection + optional rate limiting (Upstash Redis)
+- `src/components/ai-panel.tsx` — model selector dropdown + AITextAreaForm (lives in sidebar AI tab)
+- `src/components/ai-textarea-form.tsx` — textarea for pasting text, calls server action with modelId, updates form state
 - `src/lib/validation/slide-schema.tsx` — `UnstyledDocumentSchema`, `MultiSlideSchema`
 
 ### Persistence & Images
@@ -247,7 +250,7 @@ pnpm lint         # ESLint
 
 ```
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-ANTHROPIC_API_KEY=""        # Server-side Anthropic key (Claude Haiku)
+OPENROUTER_API_KEY=""       # OpenRouter API key (supports multiple AI models)
 KV_REST_API_URL=""          # Optional: Upstash Redis for rate limiting
 KV_REST_API_TOKEN=""        # Optional: Upstash Redis token
 ```

@@ -1,30 +1,13 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import {
   MultiSlideSchema,
-  UnstyledMultiSlideSchema,
 } from "@/lib/validation/slide-schema";
 import { UnstyledDocumentSchema } from "@/lib/validation/document-schema";
-import {
-  UnstyledTitleSchema,
-  UnstyledDescriptionSchema,
-  UnstyledSubtitleSchema,
-} from "@/lib/validation/text-schema";
-import { UnstyledContentImageSchema } from "@/lib/validation/image-schema";
+import { getModelById, DEFAULT_MODEL_ID } from "@/lib/ai-models";
 
-const carouselToolSchema = {
-  name: "carouselCreator",
-  description: "Creates a carousel with multiple slides for a given topic.",
-  input_schema: zodToJsonSchema(UnstyledDocumentSchema, {
-    definitions: {
-      UnstyledTitleSchema,
-      UnstyledSubtitleSchema,
-      UnstyledDescriptionSchema,
-      UnstyledContentImageSchema,
-    },
-  }) as Anthropic.Tool["input_schema"],
-};
+// No definitions option — inlines all sub-schemas so models without $ref support work correctly
+const toolJsonSchema = zodToJsonSchema(UnstyledDocumentSchema);
 
 const BASE_PROMPT = `
 You are a carousel layout engine. You organize provided text (and visual hints) into structured carousel slides.
@@ -84,52 +67,106 @@ function getSystemPrompt(template: string): string {
 export async function generateCarouselSlides(
   topicPrompt: string,
   apiKey: string,
-  template: string = "default"
+  template: string = "default",
+  modelId?: string
 ): Promise<z.infer<typeof MultiSlideSchema> | null> {
-  const client = new Anthropic({ apiKey });
+  const model = getModelById(modelId || DEFAULT_MODEL_ID);
+  if (!model) return null;
+
+  const systemPrompt = getSystemPrompt(template);
+
+  const body: Record<string, unknown> = {
+    model: model.id,
+    max_tokens: 4096,
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: topicPrompt },
+    ],
+    tools: [
+      {
+        type: "function",
+        function: {
+          name: "carouselCreator",
+          description:
+            "Creates a carousel with multiple slides for a given topic.",
+          parameters: toolJsonSchema,
+        },
+      },
+    ],
+    tool_choice: {
+      type: "function",
+      function: { name: "carouselCreator" },
+    },
+    ...(model.extraBody || {}),
+  };
 
   // --- AI Debug Logs (comment/uncomment as needed) ---
   console.groupCollapsed("[AI] Request");
-  console.log("Prompt:", topicPrompt);
-  console.log("Model:", "claude-haiku-4-5-20251001");
-  console.log("System:", getSystemPrompt(template));
-  console.log("Tool schema:", JSON.stringify(carouselToolSchema, null, 2));
+  console.log("Model:", model.id);
+  console.log("Template:", template);
+  console.log("System:", systemPrompt);
+  console.log("Tool schema:", JSON.stringify(toolJsonSchema, null, 2));
+  console.log("User prompt:", topicPrompt);
   console.groupEnd();
   // --- End AI Debug Logs ---
 
-  const result = await client.messages.create({
-    model: "claude-haiku-4-5-20251001",
-    max_tokens: 4096,
-    system: getSystemPrompt(template),
-    tools: [carouselToolSchema],
-    tool_choice: { type: "tool", name: "carouselCreator" },
-    messages: [{ role: "user", content: topicPrompt }],
-  });
+  const response = await fetch(
+    "https://openrouter.ai/api/v1/chat/completions",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "HTTP-Referer":
+          process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+        "X-Title": "Carousel Generator",
+      },
+      body: JSON.stringify(body),
+    }
+  );
 
-  const toolBlock = result.content.find((block) => block.type === "tool_use");
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error("[AI] Error:", response.status, errorText);
+    return null;
+  }
+
+  const result = await response.json();
+
+  const toolCall = result.choices?.[0]?.message?.tool_calls?.[0];
 
   // --- AI Debug Logs (comment/uncomment as needed) ---
   console.groupCollapsed("[AI] Response");
   console.log("Usage:", result.usage);
-  console.log("Stop reason:", result.stop_reason);
-  console.log("Tool output:", JSON.stringify(toolBlock?.type === "tool_use" ? toolBlock.input : null, null, 2));
+  console.log("Stop reason:", result.choices?.[0]?.finish_reason);
+  console.log(
+    "Tool output:",
+    toolCall?.function?.arguments
+  );
   console.groupEnd();
   // --- End AI Debug Logs ---
 
-  if (!toolBlock || toolBlock.type !== "tool_use") {
-    console.log("Error: no tool use block in response");
+  if (!toolCall) {
+    console.log("Error: no tool call in response");
     return null;
   }
 
-  const unstyledDocumentParseResult = UnstyledDocumentSchema.safeParse(
-    toolBlock.input
-  );
+  let toolInput: unknown;
+  try {
+    toolInput = JSON.parse(toolCall.function.arguments);
+  } catch (e) {
+    console.error("Error parsing tool arguments:", e);
+    return null;
+  }
+
+  const unstyledDocumentParseResult =
+    UnstyledDocumentSchema.safeParse(toolInput);
   if (unstyledDocumentParseResult.success) {
     return MultiSlideSchema.parse(unstyledDocumentParseResult.data.slides);
   } else {
     console.log("Error in carousel generation schema");
     console.error(unstyledDocumentParseResult.error);
-    console.log(toolBlock.input);
+    console.log(toolInput);
     return null;
   }
 }

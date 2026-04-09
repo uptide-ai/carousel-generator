@@ -39,6 +39,22 @@ function NumberInputWithLocalState({
       step={step}
       value={localValue}
       onChange={(e) => setLocalValue(e.target.value)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") {
+          e.currentTarget.blur();
+        }
+        if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+          const input = e.currentTarget;
+          requestAnimationFrame(() => {
+            const v = parseFloat(input.value);
+            if (!isNaN(v)) {
+              const clamped = Math.min(max, Math.max(min, v));
+              onChange(clamped);
+              setLocalValue(String(clamped));
+            }
+          });
+        }
+      }}
       onBlur={() => {
         const v = parseFloat(localValue);
         if (!isNaN(v)) {

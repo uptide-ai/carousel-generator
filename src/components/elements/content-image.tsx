@@ -68,6 +68,7 @@ export function ContentImage({
         )}
         style={{
           opacity: image.style.opacity / 100,
+          objectPosition: `center ${image.style.objectPosition ?? 50}%`,
           ...(isExpand
             ? { minHeight: `${image.style.height ?? 200}px` }
             : !isFill && image.style.height
@@ -113,6 +114,7 @@ export function ContentImageFillLayer({
         className="overflow-hidden object-cover w-full h-full"
         style={{
           opacity: image.style.opacity / 100,
+          objectPosition: `center ${image.style.objectPosition ?? 50}%`,
         }}
       />
     </div>
