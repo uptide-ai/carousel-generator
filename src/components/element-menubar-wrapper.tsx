@@ -206,7 +206,7 @@ const ElementMenubarWrapper = React.forwardRef<
       <div
         id={`element-menubar-${fieldName}`}
         className={cn(
-          "flex flex-row absolute -top-9 right-0 z-10",
+          "flex flex-row absolute -top-9 right-0 z-50",
           currentSelection != fieldName && "hidden",
           className
         )}

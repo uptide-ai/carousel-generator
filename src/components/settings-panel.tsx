@@ -107,7 +107,7 @@ export function SidebarPanel({ className }: { className?: string }) {
             ) : null}
           </DrawerTrigger>
           <DrawerContent className="h-[40%] ">
-            <StyleMenu form={form} className={"m-4"} />
+            <StyleMenu form={form} className={"m-3"} />
           </DrawerContent>
         </Drawer.Root>
       </div>
@@ -174,7 +174,7 @@ export function SidebarTabsPanel() {
         </ScrollArea>
         <div className="p-2 flex flex-col items-stretch w-full ">
           {currentSelection ? (
-            <StyleMenu form={form} className={"m-4"} />
+            <StyleMenu form={form} className={"m-3"} />
           ) : null}
           <VerticalTabsContent
             value={ALL_FORMS.settings.value}
