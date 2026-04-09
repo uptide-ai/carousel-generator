@@ -36,7 +36,8 @@ const SLIDE_PAUSE = 150; // ms pause between slides
 const SLIDES_PER_GROUP = 3; // navigate every N slides
 
 export function AITextAreaForm() {
-  const { setValue }: DocumentFormReturn = useFormContext();
+  const { setValue, watch }: DocumentFormReturn = useFormContext();
+  const template = watch("config.template") ?? "default";
   const { setCurrentPage, scrollToPage } = usePagerContext();
   const [isLoading, setIsLoading] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -108,7 +109,7 @@ export function AITextAreaForm() {
     setIsLoading(true);
     cancelRef.current = false;
 
-    const generatedSlides = await generateCarouselSlidesAction(data.prompt);
+    const generatedSlides = await generateCarouselSlidesAction(data.prompt, template);
 
     if (generatedSlides) {
       setIsLoading(false);

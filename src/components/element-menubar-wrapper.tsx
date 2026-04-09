@@ -80,7 +80,7 @@ function ChangeTypeDropdown({
       </Button>
       {open && (
         <div
-          className="absolute top-full right-0 mt-1 w-32 rounded-md border bg-popover p-1 shadow-md z-50"
+          className="absolute bottom-full right-0 mb-1 w-32 rounded-md border bg-popover p-1 shadow-md z-50"
           style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif" }}
           onClick={(e) => e.stopPropagation()}
         >

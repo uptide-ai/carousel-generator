@@ -4,7 +4,7 @@ import { messageRateLimit } from "@/lib/rate-limit";
 import { generateCarouselSlides } from "@/lib/langchain";
 import { headers } from "next/headers";
 
-export async function generateCarouselSlidesAction(userPrompt: string) {
+export async function generateCarouselSlidesAction(userPrompt: string, template: string = "default") {
   if (!process.env.ANTHROPIC_API_KEY) {
     return null;
   }
@@ -21,7 +21,8 @@ export async function generateCarouselSlidesAction(userPrompt: string) {
 
   const generatedSlides = await generateCarouselSlides(
     userPrompt,
-    process.env.ANTHROPIC_API_KEY
+    process.env.ANTHROPIC_API_KEY,
+    template
   );
   return generatedSlides;
 }

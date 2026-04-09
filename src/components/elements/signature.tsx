@@ -6,9 +6,11 @@ import { fontIdToClassName } from "@/lib/fonts-map";
 
 export function Signature({
   config,
+  stacked,
   className,
 }: {
   config: z.infer<typeof ConfigSchema>;
+  stacked?: boolean;
   className?: string;
 }) {
   return (
@@ -28,7 +30,7 @@ export function Signature({
           }}
         />
       )}
-      <div className={`flex items-center gap-2 flex-1 min-w-0`}>
+      <div className={stacked ? "flex flex-col items-start" : "flex items-center gap-2 flex-1 min-w-0"}>
         <p
           className={cn(`text-base truncate`, fontIdToClassName(config.fonts.font2))}
           style={{
@@ -44,6 +46,7 @@ export function Signature({
           )}
           style={{
             color: config.theme.secondary,
+            opacity: stacked ? 0.7 : 1,
           }}
         >
           {config.brand.handle}

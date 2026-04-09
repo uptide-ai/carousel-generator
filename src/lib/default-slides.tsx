@@ -45,3 +45,32 @@ export function getDefaultSlideOfType(slideType: SlideType) {
     throw Error(`Unknown slide type [${slideType}]`);
   }
 }
+
+export const TWEET_COVER: z.infer<typeof CommonSlideSchema> = {
+  elements: [DEFAULT_DESCRIPTION, DEFAULT_CONTENT_IMAGE_INPUT],
+  backgroundImage: DEFAULT_BACKGROUND_IMAGE_INPUT,
+};
+
+export const TWEET_BODY: z.infer<typeof CommonSlideSchema> = {
+  elements: [DEFAULT_DESCRIPTION],
+  backgroundImage: DEFAULT_BACKGROUND_IMAGE_INPUT,
+};
+
+export function getDefaultSlidesForTemplate(template: string) {
+  if (template === "tweet") {
+    return [
+      { ...TWEET_COVER },
+      { ...TWEET_BODY },
+      { ...TWEET_BODY },
+      { ...TWEET_BODY },
+      { ...TWEET_BODY },
+    ];
+  }
+  return [
+    getDefaultSlideOfType(SlideType.enum.Intro),
+    getDefaultSlideOfType(SlideType.enum.Common),
+    getDefaultSlideOfType(SlideType.enum.Content),
+    getDefaultSlideOfType(SlideType.enum.Content),
+    getDefaultSlideOfType(SlideType.enum.Outro),
+  ];
+}

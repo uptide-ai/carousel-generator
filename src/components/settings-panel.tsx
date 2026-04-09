@@ -40,6 +40,7 @@ import { StyleMenu } from "@/components/style-menu";
 import { useFormContext } from "react-hook-form";
 import { DocumentFormReturn } from "@/lib/document-form-types";
 import { FileForm } from "@/components/forms/file-form";
+import { TemplateForm } from "@/components/forms/template-form";
 import { AIPanel } from "@/components/ai-panel";
 
 type TabInfo = {
@@ -182,6 +183,9 @@ export function SidebarTabsPanel() {
           >
             <h4 className="text-xl font-semibold">{ALL_FORMS.settings.name}</h4>
             <Separator className="mt-2 mb-4"></Separator>
+            <h5 className="text-sm font-medium mb-2">Template</h5>
+            <TemplateForm />
+            <Separator className="mt-6 mb-4"></Separator>
             <BrandForm />
             <Separator className="mt-6 mb-4"></Separator>
             <Button
@@ -263,6 +267,9 @@ export function DrawerFormsPanel({ className }: { className: string }) {
           >
             <h4 className="text-xl font-semibold">{ALL_FORMS.settings.name}</h4>
             <Separator className="mt-2 mb-4"></Separator>
+            <h5 className="text-sm font-medium mb-2">Template</h5>
+            <TemplateForm />
+            <Separator className="mt-6 mb-4"></Separator>
             <BrandForm />
           </TabsContent>
           <TabsContent

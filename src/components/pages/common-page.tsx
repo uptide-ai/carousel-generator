@@ -23,6 +23,7 @@ import { ElementType } from "@/lib/validation/element-type";
 import { ContentImage, ContentImageFillLayer } from "@/components/elements/content-image";
 import ElementMenubarWrapper from "@/components/element-menubar-wrapper";
 import { ObjectFitType, ContentImageSchema } from "@/lib/validation/image-schema";
+import { Signature } from "@/components/elements/signature";
 
 export function CommonPage({
   index,
@@ -79,6 +80,9 @@ export function CommonPage({
           fieldName={backgroundImageField}
           className={cn("gap-2", firstIsExpand && "justify-start")}
         >
+          {config.template === "tweet" && (
+            <Signature config={config} stacked className="shrink-0" />
+          )}
           {slide.elements.map((element, index) => {
             const currentField = (fieldName +
               ".elements." +
