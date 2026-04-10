@@ -33,11 +33,11 @@ export function PageBase({
         height: `${size.height}px`,
         minWidth: `${size.width}px`,
         minHeight: `${size.height}px`,
-        // Allow overflow on all sides so the element menubar (-top-9) and
-        // its change-type dropdown (opens downward) are never clipped by
-        // the slide edges. Images are already constrained inside the slide
-        // via absolute layers / padding, so nothing else leaks visually.
-        overflowClipMargin: "200px",
+        // Only the top edge is allowed to overflow so the element menubar
+        // (positioned at -top-9 on the first element) can escape upward,
+        // while images / content are still strictly clipped on the other
+        // sides and cannot bleed into neighboring slides.
+        overflowClipMarginTop: "40px",
       } as React.CSSProperties}
     >
       {children}
