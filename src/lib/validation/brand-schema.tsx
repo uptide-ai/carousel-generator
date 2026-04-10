@@ -6,7 +6,7 @@ export type BrandTemplate = z.infer<typeof BrandTemplate>;
 
 export const BrandSchema = z.object({
   showBrand: z.boolean().default(true),
-  template: BrandTemplate.default(BrandTemplate.enum.FooterFull),
+  template: BrandTemplate.default(BrandTemplate.enum.FooterHandle),
   avatar: ImageSchema.default(DEFAULT_IMAGE_INPUT),
   name: z
     .string()

@@ -53,9 +53,14 @@ export function CommonPage({
     lastElement?.type === ElementType.enum.ContentImage &&
     (lastElement as z.infer<typeof ContentImageSchema>).style.objectFit === ObjectFitType.enum.Expand;
 
-  const brandTemplate = config.brand.template ?? BrandTemplate.enum.FooterFull;
+  const brandTemplate = config.brand.template ?? BrandTemplate.enum.FooterHandle;
   const showBrandTweetAtTop =
     config.brand.showBrand && brandTemplate === BrandTemplate.enum.Tweet;
+  // FooterHandle is rendered absolutely at the bottom of the slide so it
+  // does NOT steal grid space from the centered content.
+  const isFooterHandleFloating =
+    brandTemplate === BrandTemplate.enum.FooterHandle &&
+    config.brand.showBrand;
 
   return (
     <PageBase size={size} fieldName={backgroundImageField}>
@@ -79,7 +84,9 @@ export function CommonPage({
           paddingBottom: lastIsExpand ? 0 : `${config.theme.padding ?? 30}px`,
           paddingLeft: `${config.theme.padding ?? 30}px`,
           paddingRight: `${config.theme.padding ?? 30}px`,
-          ...(lastIsExpand ? { gridTemplateRows: "1fr" } : {}),
+          ...(lastIsExpand || isFooterHandleFloating
+            ? { gridTemplateRows: "1fr" }
+            : {}),
         }}
       >
         <PageLayout
@@ -153,12 +160,25 @@ export function CommonPage({
             ) : null;
           })}
         </PageLayout>
-        <div>
-          {!lastIsExpand && (
-            <Footer number={index + 1} config={config} />
-          )}
-        </div>
+        {!isFooterHandleFloating && (
+          <div>
+            {!lastIsExpand && (
+              <Footer number={index + 1} config={config} />
+            )}
+          </div>
+        )}
       </PageFrame>
+      {isFooterHandleFloating && (
+        <div
+          className="absolute left-0 right-0 bottom-4 pointer-events-none"
+          style={{
+            paddingLeft: `${config.theme.padding ?? 30}px`,
+            paddingRight: `${config.theme.padding ?? 30}px`,
+          }}
+        >
+          <Footer number={index + 1} config={config} />
+        </div>
+      )}
       <AddElement
         fieldName={(fieldName + ".elements") as ElementArrayFieldPath}
         className="absolute bottom-3 right-3 z-10"

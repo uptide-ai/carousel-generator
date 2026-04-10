@@ -18,6 +18,7 @@ export const defaultValues = {
   config: {
     brand: {
       showBrand: false,
+      template: "FooterHandle" as const,
       avatar: DEFAULT_IMAGE_INPUT,
       name: "My name",
       handle: "@name",
