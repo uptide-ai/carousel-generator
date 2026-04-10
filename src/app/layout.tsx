@@ -57,7 +57,7 @@ const montserrat = Montserrat({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-montserrat",
-  weight: ["500", "700", "900"],
+  weight: "variable",
 });
 
 const pt_serif = PT_Serif({
@@ -71,14 +71,14 @@ const roboto = Roboto({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-roboto",
-  weight: ["500", "700"],
+  weight: ["100", "300", "400", "500", "700", "900"],
 });
 
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-inter",
-  weight: ["500", "700"],
+  weight: "variable",
 });
 
 const archivoBlack = Archivo_Black({
@@ -99,84 +99,84 @@ const roboto_condensed = Roboto_Condensed({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-roboto-condensed",
-  weight: ["400", "700"],
+  weight: "variable",
 });
 
 const syne = Syne({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-syne",
-  weight: ["500", "700"],
+  weight: "variable",
 });
 
 const open_sans = Open_Sans({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-open-sans",
-  weight: ["400", "600", "700"],
+  weight: "variable",
 });
 
 const lato = Lato({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-lato",
-  weight: ["400", "700", "900"],
+  weight: ["100", "300", "400", "700", "900"],
 });
 
 const oswald = Oswald({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-oswald",
-  weight: ["400", "500", "700"],
+  weight: "variable",
 });
 
 const raleway = Raleway({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-raleway",
-  weight: ["400", "600", "700"],
+  weight: "variable",
 });
 
 const poppins = Poppins({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-poppins",
-  weight: ["400", "500", "600", "700"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
 const playfair_display = Playfair_Display({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-playfair-display",
-  weight: ["400", "700", "900"],
+  weight: "variable",
 });
 
 const nunito = Nunito({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-nunito",
-  weight: ["400", "600", "700"],
+  weight: "variable",
 });
 
 const rubik = Rubik({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-rubik",
-  weight: ["400", "500", "700"],
+  weight: "variable",
 });
 
 const work_sans = Work_Sans({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-work-sans",
-  weight: ["400", "500", "700"],
+  weight: "variable",
 });
 
 const lora = Lora({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-lora",
-  weight: ["400", "600", "700"],
+  weight: "variable",
 });
 
 const bebas_neue = Bebas_Neue({
@@ -190,14 +190,14 @@ const quicksand = Quicksand({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-quicksand",
-  weight: ["400", "500", "700"],
+  weight: "variable",
 });
 
 const space_grotesk = Space_Grotesk({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-space-grotesk",
-  weight: ["400", "500", "700"],
+  weight: "variable",
 });
 
 const libre_baskerville = Libre_Baskerville({
@@ -211,63 +211,63 @@ const josefin_sans = Josefin_Sans({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-josefin-sans",
-  weight: ["400", "600", "700"],
+  weight: "variable",
 });
 
 const cabin = Cabin({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-cabin",
-  weight: ["400", "500", "700"],
+  weight: "variable",
 });
 
 const karla = Karla({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-karla",
-  weight: ["400", "500", "700"],
+  weight: "variable",
 });
 
 const bitter = Bitter({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-bitter",
-  weight: ["400", "500", "700"],
+  weight: "variable",
 });
 
 const merriweather = Merriweather({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-merriweather",
-  weight: ["400", "700", "900"],
+  weight: ["300", "400", "700", "900"],
 });
 
 const roboto_slab = Roboto_Slab({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-roboto-slab",
-  weight: ["400", "500", "700"],
+  weight: "variable",
 });
 
 const barlow = Barlow({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-barlow",
-  weight: ["400", "500", "700"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
 const nunito_sans = Nunito_Sans({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-nunito-sans",
-  weight: ["400", "600", "700"],
+  weight: "variable",
 });
 
 const fira_sans = Fira_Sans({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-fira-sans",
-  weight: ["400", "500", "700"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
 const anton = Anton({

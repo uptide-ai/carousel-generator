@@ -33,8 +33,11 @@ export function PageBase({
         height: `${size.height}px`,
         minWidth: `${size.width}px`,
         minHeight: `${size.height}px`,
-        overflowClipMargin: "40px",
-      }}
+        // Only allow the top edge to overflow — lets the element menubar
+        // (positioned at -top-9 on the first element) escape the slide's
+        // clip, without letting images bleed out the bottom.
+        overflowClipMarginTop: "40px",
+      } as React.CSSProperties}
     >
       {children}
     </div>

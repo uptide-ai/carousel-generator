@@ -12,7 +12,12 @@ import {
 } from "@/lib/document-form-types";
 import { getParent } from "@/lib/field-path";
 import { useSelectionContext } from "@/lib/providers/selection-context";
-import { CSSProperties } from "react";
+import {
+  hasInlineMarkdown,
+  parseInlineMarkdown,
+} from "@/lib/inline-markdown";
+import { cn } from "@/lib/utils";
+import { CSSProperties, useEffect, useRef, useState } from "react";
 
 export function TextAreaFormField({
   form,
@@ -30,34 +35,80 @@ export function TextAreaFormField({
   style?: CSSProperties;
 }) {
   const { setCurrentSelection } = useSelectionContext();
+  const [isEditing, setIsEditing] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  // When switching into edit mode, move focus to the textarea.
+  useEffect(() => {
+    if (isEditing && textareaRef.current) {
+      const el = textareaRef.current;
+      el.focus();
+      const len = el.value.length;
+      el.setSelectionRange(len, len);
+    }
+  }, [isEditing]);
 
   return (
     <FormField
       control={form.control}
       name={fieldName}
-      render={({ field }) => (
-        <FormItem className={"space-y-0"}>
-          <FormLabel>{label}</FormLabel>
-          <FormControl>
-            <AutoTextarea
-              placeholder={placeholder}
-              className={className}
-              style={style}
-              {...field}
-              onFocus={(event) => {
-                setCurrentSelection(getParent(fieldName), event);
-              }}
-              onClick={(event) => {
-                event.stopPropagation();
-              }}
-              value={form.getValues(fieldName)}
-              // TODO: Create currentHover
-              // Link with onMouseEnter and onMouseLeave
-            />
-          </FormControl>
-          <FormMessage />
-        </FormItem>
-      )}
+      render={({ field }) => {
+        const value = (field.value as string) ?? "";
+        const showRendered =
+          !isEditing && value.length > 0 && hasInlineMarkdown(value);
+
+        return (
+          <FormItem className={"space-y-0"}>
+            <FormLabel>{label}</FormLabel>
+            <FormControl>
+              {showRendered ? (
+                <div
+                  className={cn(className, "cursor-text")}
+                  style={{
+                    ...style,
+                    whiteSpace: "pre-wrap",
+                    wordBreak: "break-word",
+                  }}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setCurrentSelection(getParent(fieldName), event);
+                    setIsEditing(true);
+                  }}
+                  dangerouslySetInnerHTML={{
+                    __html: parseInlineMarkdown(value),
+                  }}
+                />
+              ) : (
+                <AutoTextarea
+                  placeholder={placeholder}
+                  className={className}
+                  style={style}
+                  {...field}
+                  ref={(el) => {
+                    textareaRef.current = el;
+                    if (typeof field.ref === "function") {
+                      field.ref(el);
+                    }
+                  }}
+                  onFocus={(event) => {
+                    setIsEditing(true);
+                    setCurrentSelection(getParent(fieldName), event);
+                  }}
+                  onBlur={() => {
+                    field.onBlur();
+                    setIsEditing(false);
+                  }}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                  }}
+                  value={value}
+                />
+              )}
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        );
+      }}
     />
   );
 }

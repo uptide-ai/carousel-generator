@@ -104,6 +104,7 @@ src/
     convert-file.tsx      # File → base64 data URL conversion
     ai-models.ts          # AI model definitions (OpenRouter model IDs, per-model config)
     langchain.ts          # OpenRouter API client + carousel generation prompt
+    inline-markdown.ts    # Minimal parser: *bold* → <strong>, _italic_ → <em> (HTML-escaped)
 ```
 
 ## Data Model
@@ -168,6 +169,8 @@ All state lives in a single React Hook Form instance (`useForm` with `zodResolve
 - **Per-element color overrides**: Text elements (Title/Subtitle/Description) support optional `color` and `backgroundColor` in their style. Color pickers appear in the StyleMenu when a text element is selected. Reset buttons revert to theme defaults.
 - **Slide vertical layout**: `PageFrame` uses CSS Grid (`grid-template-rows: 1fr auto`) with 3 children: (1) `PageLayout` in the `1fr` row centers elements with `justify-center`, (2) a wrapper div in the `auto` row holds both `AddElement` button and `Footer`. This ensures the "+" button doesn't affect vertical centering of content elements.
 - **Reset all**: Settings tab has a "Reset all" button that calls `form.reset(defaultValues)` + `localStorage.removeItem("documentFormKey")` to start fresh.
+- **Inline markdown in text fields**: Title/Subtitle/Description support `*bold*` and `_italic_` via a minimal parser in `inline-markdown.ts`. `TextAreaFormField` toggles between an editable `<textarea>` (showing raw markdown source) when focused and a `<div>` with `dangerouslySetInnerHTML` (rendered HTML) when blurred. Regex requires non-whitespace on both sides of the delimiters (`*foo*`, not `* foo *`) to avoid matching literal asterisks in text like `5 * 3`. Input is HTML-escaped before applying markdown so the output is safe. Only switches to the rendered div when the text actually contains markdown — plain text always shows the textarea to avoid visual jumps and preserve placeholder behavior.
+- **Title/Subtitle descender clipping**: Title and Subtitle elements apply `clipPath: "inset(0 0 0.2em 0)"` and compensate with `marginBottom: calc(... - 0.2em)` to trim ugly descender/line-gap space at the bottom of display fonts. `PageBase` uses `overflowClipMarginTop: "40px"` (per-side longhand) so the element menubar (positioned at `-top-9` on the first element) can still escape the slide's top edge without letting images or other content bleed out the bottom/sides.
 
 ## AI Formatting (Format with AI)
 
