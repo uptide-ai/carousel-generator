@@ -11,7 +11,6 @@ import {
   Trash,
   ChevronLeft,
   ChevronRight,
-  X,
 } from "lucide-react";
 import {
   DocumentFormReturn,
@@ -22,87 +21,7 @@ import { cn } from "@/lib/utils";
 import { getSlideNumber } from "@/lib/field-path";
 import { SIZE } from "@/lib/page-size";
 import { toPng } from "html-to-image";
-import React, { useState, useRef, useEffect } from "react";
-
-function SlideColorPicker({
-  fieldName,
-}: {
-  fieldName: string;
-}) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-  const { watch, setValue }: DocumentFormReturn = useFormContext();
-  const bgColorPath = `${fieldName}.backgroundColor` as any;
-  const currentBgColor = watch(bgColorPath);
-  const globalBgColor = watch("config.theme.background");
-  const displayColor = currentBgColor || globalBgColor;
-
-  useEffect(() => {
-    if (!open) return;
-    function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [open]);
-
-  return (
-    <div className="relative" ref={ref}>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="w-8 h-8"
-        onClick={(e) => {
-          e.stopPropagation();
-          setOpen(!open);
-        }}
-        title="Slide background color"
-      >
-        <span
-          className="w-4 h-4 rounded-full flex-shrink-0 pointer-events-none"
-          style={{ backgroundColor: displayColor, border: '1.75px solid hsl(var(--muted-foreground))' }}
-        />
-      </Button>
-      {open && (
-        <div
-          className="absolute top-full right-0 mt-1 rounded-md border bg-popover p-3 shadow-md z-50"
-          style={{ fontFamily: "ui-sans-serif, system-ui, sans-serif" }}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex flex-col gap-2">
-            <label className="text-xs font-medium text-muted-foreground">Background</label>
-            <div className="flex items-center gap-2">
-              <input
-                type="color"
-                value={displayColor}
-                onChange={(e) => setValue(bgColorPath, e.target.value)}
-                className="w-8 h-8 rounded cursor-pointer border-0 p-0"
-              />
-              <input
-                type="text"
-                value={currentBgColor || ""}
-                placeholder={globalBgColor}
-                onChange={(e) => setValue(bgColorPath, e.target.value || undefined)}
-                className="w-20 text-xs px-2 py-1 border rounded bg-background"
-              />
-            </div>
-            {currentBgColor && (
-              <button
-                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-                onClick={() => setValue(bgColorPath, undefined)}
-              >
-                <X className="w-3 h-3" />
-                Reset to global
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
+import React, { useState } from "react";
 
 export default function SlideMenubar({
   slidesFieldArray,
@@ -169,7 +88,6 @@ export default function SlideMenubar({
       >
         <ChevronLeft className="w-4 h-4 text-muted-foreground" />
       </Button>
-      <SlideColorPicker fieldName={fieldName} />
       <Button
         onClick={() => {
           console.log({

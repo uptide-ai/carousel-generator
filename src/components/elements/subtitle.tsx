@@ -1,6 +1,5 @@
 import { cn } from "@/lib/utils";
 import { fontIdToClassName } from "@/lib/fonts-map";
-import { textStyleToClasses } from "@/lib/text-style-to-classes";
 import { useFormContext } from "react-hook-form";
 import {
   DocumentFormReturn,
@@ -25,6 +24,8 @@ export function Subtitle({
     `${fieldName}.style` as StyleFieldPath
   ) as TextFieldStyle;
   const textFieldName = (fieldName + ".text") as TextTextFieldPath;
+  const effectiveAlign =
+    style.align ?? config.theme.contentAlign?.horizontal ?? "Left";
 
   return (
     <TextAreaFormField
@@ -34,12 +35,11 @@ export function Subtitle({
       placeholder={"Your subtitle here"}
       className={cn(
         ``,
-        textStyleToClasses({ style }),
         fontIdToClassName(config.fonts.font1),
         className
       )}
       style={{
-        color: style.color ?? config.theme.secondary,
+        color: style.color ?? config.fonts.font1Style?.color ?? config.theme.secondary,
         backgroundColor: style.backgroundColor ?? undefined,
         fontSize: `${style.fontSize ?? Math.round((config.fonts.font1Style?.fontSize ?? 48) * 0.65)}px`,
         fontWeight: config.fonts.font1Style?.fontWeight ?? 700,
@@ -48,6 +48,7 @@ export function Subtitle({
         marginBottom: `calc(${style.paragraphSpacing ?? 0}em - 0.2em)`,
         textWrap: config.fonts.font1Style?.textBalance ? "balance" : undefined,
         clipPath: "inset(0 0 0.2em 0)",
+        textAlign: effectiveAlign.toLowerCase() as "left" | "center" | "right",
       } as React.CSSProperties}
     />
   );

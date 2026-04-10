@@ -62,11 +62,33 @@ export function CommonPage({
     brandTemplate === BrandTemplate.enum.FooterHandle &&
     config.brand.showBrand;
 
+  const slideBgColor = slide.backgroundColor || config.theme.background;
+  const hasBackgroundImage = !!slide.backgroundImage?.source.src;
+  const gradientValue = slide.gradient ?? (hasBackgroundImage ? -45 : 0);
+  const gradientCoverage = Math.abs(gradientValue);
+  const gradientColor = slide.gradientColor ?? "#000000";
+
   return (
     <PageBase size={size} fieldName={backgroundImageField}>
-      <BackgroundLayer background={slide.backgroundColor || config.theme.background} className="-z-20" />
+      <BackgroundLayer background={slideBgColor} className="-z-20" />
       {slide.backgroundImage?.source.src ? (
         <BackgroundImageLayer image={slide.backgroundImage} className="-z-10" />
+      ) : null}
+      {gradientCoverage > 0 ? (
+        <div
+          aria-hidden
+          className="absolute inset-0 pointer-events-none -z-[5]"
+          style={{
+            background:
+              gradientValue < 0
+                ? `linear-gradient(to bottom, transparent ${
+                    100 - gradientCoverage
+                  }%, ${gradientColor} 100%)`
+                : `linear-gradient(to top, transparent ${
+                    100 - gradientCoverage
+                  }%, ${gradientColor} 100%)`,
+          }}
+        />
       ) : null}
       {slide.elements.map((element, idx) =>
         element.type == ElementType.enum.ContentImage ? (
@@ -92,6 +114,12 @@ export function CommonPage({
         <PageLayout
           fieldName={backgroundImageField}
           className={cn("gap-2", firstIsExpand && "justify-start")}
+          horizontalAlign={config.theme.contentAlign?.horizontal ?? "Left"}
+          verticalAlign={
+            firstIsExpand
+              ? "Top"
+              : config.theme.contentAlign?.vertical ?? "Center"
+          }
         >
           {showBrandTweetAtTop && (
             <div className="w-full mb-2">

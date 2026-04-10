@@ -4,7 +4,6 @@ import { ConfigSchema } from "@/lib/validation/document-schema";
 import { cn } from "@/lib/utils";
 import { fontIdToClassName } from "@/lib/fonts-map";
 import { TitleSchema } from "@/lib/validation/text-schema";
-import { textStyleToClasses } from "@/lib/text-style-to-classes";
 import { useFormContext } from "react-hook-form";
 import {
   DocumentFormReturn,
@@ -29,6 +28,8 @@ export function Title({
     `${fieldName}.style` as StyleFieldPath
   ) as TextFieldStyle;
   const textFieldName = (fieldName + ".text") as TextTextFieldPath;
+  const effectiveAlign =
+    style.align ?? config.theme.contentAlign?.horizontal ?? "Left";
   return (
     <TextAreaFormField
       fieldName={textFieldName}
@@ -37,12 +38,11 @@ export function Title({
       placeholder={"Your title here"}
       className={cn(
         ``,
-        textStyleToClasses({ style }),
         fontIdToClassName(config.fonts.font1),
         className
       )}
       style={{
-        color: style.color ?? config.theme.primary,
+        color: style.color ?? config.fonts.font1Style?.color ?? config.theme.primary,
         backgroundColor: style.backgroundColor ?? undefined,
         fontSize: `${style.fontSize ?? config.fonts.font1Style?.fontSize ?? 48}px`,
         fontWeight: config.fonts.font1Style?.fontWeight ?? 700,
@@ -51,6 +51,7 @@ export function Title({
         marginBottom: `calc(${style.paragraphSpacing ?? 0}em - 0.2em)`,
         textWrap: config.fonts.font1Style?.textBalance ? "balance" : undefined,
         clipPath: "inset(0 0 0.2em 0)",
+        textAlign: effectiveAlign.toLowerCase() as "left" | "center" | "right",
       } as React.CSSProperties}
     />
   );

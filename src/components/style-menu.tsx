@@ -43,11 +43,13 @@ const textAlignMap: Record<TextALignType, React.ReactElement> = {
   [TextALignType.enum.Right]: <AlignRight className="h-4 w-4" />,
 };
 
-const objectFitMap: Record<ObjectFitType, React.ReactElement> = {
+// "Fill" mode is intentionally omitted — full-slide image is configured by
+// clicking the slide itself (opens slide Style panel with backgroundImage).
+const objectFitMap: Partial<Record<ObjectFitType, React.ReactElement>> = {
   [ObjectFitType.enum.Contain]: <Minimize2 className="h-4 w-4" />,
   [ObjectFitType.enum.Cover]: <Maximize2 className="h-4 w-4" />,
   [ObjectFitType.enum.Expand]: <MoveHorizontal className="h-4 w-4" />,
-  [ObjectFitType.enum.Fill]: <Expand className="h-4 w-4" />,
+  // [ObjectFitType.enum.Fill]: <Expand className="h-4 w-4" />,
 };
 
 function InlineColorPicker({
@@ -115,6 +117,20 @@ export function StyleMenu({
     type === ElementType.enum.Subtitle ||
     type === ElementType.enum.Description;
 
+  // Slide-level selection: path ends with ".backgroundImage"
+  const isSlideSelection = elementPath?.endsWith(".backgroundImage") ?? false;
+  const slidePath = isSlideSelection
+    ? (elementPath as string).replace(/\.backgroundImage$/, "")
+    : "";
+  // Watch the slide background image src so the gradient default flips
+  // between 0 (no image → off) and -45 (image → bottom fade) live.
+  const slideBgImageSrc = isSlideSelection
+    ? ((form.watch(
+        `${slidePath}.backgroundImage.source.src` as any
+      ) as string) ?? "")
+    : "";
+  const gradientDefaultValue = slideBgImageSrc ? -45 : 0;
+
   // Compute effective fontSize default based on element type and global config
   const config = form.getValues("config");
   const globalFont1Size = config.fonts.font1Style?.fontSize ?? 48;
@@ -143,20 +159,57 @@ export function StyleMenu({
       <div className="space-y-2">
         <TypographyH3>Style</TypographyH3>
         <p className="text-sm text-muted-foreground">
-          Set the selected element style.
+          {isSlideSelection
+            ? "Set the selected slide style."
+            : "Set the selected element style."}
         </p>
       </div>
       <Separator orientation="horizontal"></Separator>
       <div className="flex flex-col gap-6 items-start">
-        {style && Object.hasOwn(style, "align") ? (
-          <EnumRadioGroupField
-            name="Alignment"
-            form={form}
-            fieldName={`${stylePath}.align` as TextStyleAlignFieldPath}
-            enumValueElements={textAlignMap}
-            groupClassName="grid grid-cols-3 gap-1"
-            itemClassName="h-10 w-10"
-          />
+        {isTextElement ? (
+          <div className="flex flex-col gap-2 w-full">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-sm font-medium">Alignment</span>
+              {(style as any)?.align ? (
+                <button
+                  type="button"
+                  className="flex items-center text-xs text-muted-foreground hover:text-foreground"
+                  onClick={() =>
+                    form.setValue(
+                      `${stylePath}.align` as TextStyleAlignFieldPath,
+                      undefined as any
+                    )
+                  }
+                  title="Reset to global alignment"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              ) : null}
+            </div>
+            <div className="grid grid-cols-3 gap-1">
+              {(Object.entries(textAlignMap) as [TextALignType, React.ReactElement][]).map(
+                ([value, icon]) => (
+                  <button
+                    key={value}
+                    type="button"
+                    className={cn(
+                      "h-10 flex items-center justify-center rounded-md border border-input bg-background hover:bg-accent",
+                      (style as any)?.align === value &&
+                        "bg-accent border-primary"
+                    )}
+                    onClick={() =>
+                      form.setValue(
+                        `${stylePath}.align` as TextStyleAlignFieldPath,
+                        value
+                      )
+                    }
+                  >
+                    {icon}
+                  </button>
+                )
+              )}
+            </div>
+          </div>
         ) : null}
         {isTextElement ? (
           <SliderInputField
@@ -222,8 +275,8 @@ export function StyleMenu({
             name={"Object Fit"}
             form={form}
             fieldName={`${stylePath}.objectFit` as ImageStyleObjectFitFieldPath}
-            enumValueElements={objectFitMap}
-            groupClassName="grid grid-cols-4 gap-1"
+            enumValueElements={objectFitMap as Record<ObjectFitType, React.ReactElement>}
+            groupClassName="grid grid-cols-3 gap-1"
             itemClassName="h-10 w-10"
           />
         ) : null}
@@ -264,6 +317,45 @@ export function StyleMenu({
                 form.getValues(
                   `${elementPath}.source.src` as ImageSourceSrcFieldPath
                 ) == ""
+              }
+            />
+          </>
+        ) : null}
+        {isSlideSelection ? (
+          <>
+            <SliderInputField
+              fieldName={`${slidePath}.gradient` as any}
+              form={form}
+              label="Gradient"
+              min={-100}
+              max={100}
+              step={1}
+              defaultValue={gradientDefaultValue}
+              className="w-full"
+            />
+            <InlineColorPicker
+              label="Gradient Color"
+              value={form.getValues(`${slidePath}.gradientColor` as any)}
+              defaultColor="#000000"
+              onChange={(c) =>
+                form.setValue(`${slidePath}.gradientColor` as any, c)
+              }
+              onReset={() =>
+                form.setValue(`${slidePath}.gradientColor` as any, undefined)
+              }
+            />
+            <InlineColorPicker
+              label="Background Color"
+              value={form.getValues(`${slidePath}.backgroundColor` as any)}
+              defaultColor={config.theme.background}
+              onChange={(c) =>
+                form.setValue(`${slidePath}.backgroundColor` as any, c)
+              }
+              onReset={() =>
+                form.setValue(
+                  `${slidePath}.backgroundColor` as any,
+                  undefined
+                )
               }
             />
           </>

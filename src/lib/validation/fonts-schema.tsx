@@ -6,6 +6,7 @@ export const FontStyleSchema = z.object({
   fontWeight: z.number().min(100).max(900).step(100).default(700),
   textBalance: z.boolean().default(false),
   fontSize: z.number().min(8).max(200).default(48), // px — base size for this font
+  color: z.string().optional(), // undefined = use theme primary/secondary
 });
 
 export const FontsSchema = z.object({
