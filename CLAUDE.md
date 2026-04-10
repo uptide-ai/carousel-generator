@@ -132,7 +132,7 @@ Document
 
 **Element types**: Title, Subtitle, Description, ContentImage, Image, XTwitter
 **Text style** (per-element override): fontSize (8-200px, optional — if unset computed from global), align (Left/Center/Right), paragraphSpacing/bottomSpacing (0-3em), color (optional hex — overrides theme primary/secondary), backgroundColor (optional hex — highlight behind text)
-**Font style** (global per-font in config.fonts): fontSize (8-200px, default font1=48, font2=18), lineHeight (0.5-4), letterSpacing (-0.1 to 0.5em), fontWeight (100-900), textBalance (boolean → `text-wrap: balance`)
+**Font style** (global per-font in config.fonts): fontSize (8-200px, default font1=38, font2=18), lineHeight (0.5-4), letterSpacing (-0.1 to 0.5em), fontWeight (100-900), textBalance (boolean → `text-wrap: balance`)
 **Font size proportional scaling**: Title uses global font1 fontSize directly. Subtitle uses font1 fontSize × 0.65. Description uses global font2 fontSize. Per-element fontSize override takes priority over global.
 **Slide padding**: configurable via `config.theme.padding` (0-80px, default 30px) — controls inner padding of all slides
 **Image style**: opacity (0-100), objectFit (Contain/Cover/Expand/Fill), height (50-500px, optional)

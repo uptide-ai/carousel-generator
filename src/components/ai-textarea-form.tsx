@@ -65,18 +65,35 @@ export function AITextAreaForm({ modelId }: { modelId: string }) {
     const delay = (ms: number) =>
       new Promise((r) => setTimeout(r, ms));
 
-    for (let s = 0; s < slides.length; s++) {
-      if (cancelRef.current) break;
+    const finalize = () => {
+      // Replace full slides array AND explicitly set each text field so every
+      // field subscriber re-renders with the completed value.
+      setValue("slides", slides);
+      for (let s = 0; s < slides.length; s++) {
+        for (let e = 0; e < slides[s].elements.length; e++) {
+          const el = slides[s].elements[e];
+          if ("text" in el) {
+            setValue(`slides.${s}.elements.${e}.text`, el.text);
+          }
+        }
+      }
+      setCurrentPage(0);
+    };
+
+    outer: for (let s = 0; s < slides.length; s++) {
+      if (cancelRef.current) break outer;
 
       // Navigate to first slide of each new group
       if (s % SLIDES_PER_GROUP === 0) {
         scrollToPage(s);
         await delay(600); // let carousel scroll settle
+        if (cancelRef.current) break outer;
       }
       await delay(SLIDE_PAUSE);
+      if (cancelRef.current) break outer;
 
       for (let e = 0; e < slides[s].elements.length; e++) {
-        if (cancelRef.current) break;
+        if (cancelRef.current) break outer;
         const element = slides[s].elements[e];
         if (!("text" in element)) continue;
 
@@ -84,7 +101,7 @@ export function AITextAreaForm({ modelId }: { modelId: string }) {
         const words = fullText.split(/(\s+)/); // split keeping whitespace
         let built = "";
         for (const word of words) {
-          if (cancelRef.current) break;
+          if (cancelRef.current) break outer;
           built += word;
           // Only delay on actual words, not whitespace
           if (word.trim()) {
@@ -96,9 +113,8 @@ export function AITextAreaForm({ modelId }: { modelId: string }) {
       }
     }
 
-    // Always set final state — covers both normal completion and skip
-    setValue("slides", slides);
-    setCurrentPage(0);
+    // Always finalize — covers both normal completion and skip
+    finalize();
   }
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {

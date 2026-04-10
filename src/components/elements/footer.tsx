@@ -33,7 +33,7 @@ const Footer = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          "flex flex-row justify-center items-center relative mt-4",
+          "flex flex-row justify-center items-center relative mt-20",
           className
         )}
       >
