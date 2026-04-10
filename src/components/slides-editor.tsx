@@ -6,6 +6,7 @@ import {
 import { Document } from "./pages/document";
 import useWindowDimensions from "@/lib/hooks/use-window-dimensions";
 import { SIZE } from "@/lib/page-size";
+import { useSelectionContext } from "@/lib/providers/selection-context";
 import { useEffect } from "react";
 import { useStatusContext } from "@/lib/providers/editor-status-context";
 import { DocumentSkeleton } from "@/components/editor-skeleton";
@@ -24,6 +25,7 @@ export function SlidesEditor({}: SlidesEditorProps) {
     control,
     name: "slides",
   });
+  const { setCurrentSelection } = useSelectionContext();
   const { status, setStatus } = useStatusContext();
   const { numPages } = useFieldArrayValues("slides");
 
@@ -49,7 +51,12 @@ export function SlidesEditor({}: SlidesEditorProps) {
   }
 
   return (
-    <div className="flex flex-col w-full items-center justify-start bg-muted/20 flex-1 h-full">
+    <div
+      className="flex flex-col w-full items-center justify-start bg-muted/20 flex-1 h-full"
+      onClick={(event) => {
+        setCurrentSelection("", event);
+      }}
+    >
       <div className="flex flex-col p-4 w-full h-full items-center justify-start gap-8 font-mono text-sm bg-primary/10">
         <div className="w-full px-4 py-6">
           {isLoadingWidth || status == "loading" ? (
