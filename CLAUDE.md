@@ -143,8 +143,8 @@ Document
   - Height slider appears in style menu for ContentImage (except Fill mode), default 200px
 **Per-slide background color**: optional `backgroundColor` field on each slide, overrides global `config.theme.background`. Color picker dot in slide menubar (between arrows) with hex input and "Reset to global" option.
 **Brand**: showBrand toggle controls global brand visibility. `template` selects one of:
-  - **FooterFull** (default): avatar + name + handle signature in footer (left), page number right
-  - **FooterHandle**: only `@handle` centered in footer, page number absolute-right
+  - **FooterHandle** (default): only `@handle` centered in footer, page number absolute-right. Rendered as an **absolutely positioned sibling of `PageFrame` inside `PageBase`** (`bottom-4`, with horizontal padding matching `config.theme.padding`) so it does NOT take space in the `1fr auto` grid. When this template is active, `PageFrame`'s grid collapses to `1fr` and content stays fully centered regardless of the footer's vertical offset.
+  - **FooterFull**: avatar + name + handle signature in footer (left), page number right. Rendered inside the grid `auto` row as normal.
   - **Tweet**: TweetBlock rendered as the first child INSIDE `PageLayout` (above the normal elements) so it is composed with them by the `justify-center` flex — the whole group (tweet + elements) stays vertically centered. Footer shows only page number. Grid stays `1fr auto`; no special row override.
 **XTwitter element**: per-slide version of the brand Tweet block. Schema is just `{ type: "XTwitter" }` — it reads `name`, `handle`, and `avatar` from `config.brand` at render time, so there are no per-element editable fields. Use it when you want the tweet block on some slides only (e.g. just the cover) rather than on every slide via the brand Tweet template. Both paths share the `TweetBlock` component for identical visuals. StyleMenu shows a hint pointing back to the Settings tab when an XTwitter element is selected; it accesses style via `(values as any).style` so all style-dependent blocks short-circuit on `undefined`.
 

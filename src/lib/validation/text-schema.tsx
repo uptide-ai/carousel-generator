@@ -88,5 +88,5 @@ export const DEFAULT_SUBTITLE: z.infer<typeof SubtitleSchema> =
 
 export const DEFAULT_DESCRIPTION: z.infer<typeof DescriptionSchema> =
   DescriptionSchema.parse({
-    text: "Lorem *ipsum* dolor sit amet consectetur _adipisicing_ elit. Expedita, dolorum. awesome subtitle",
+    text: "Lorem *ipsum* dolor sit amet consectetur _adipisicing_ elit. Expedita, dolorum.",
   });
