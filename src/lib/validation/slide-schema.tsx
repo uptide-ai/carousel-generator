@@ -44,6 +44,12 @@ export const CommonSlideSchema = z.object({
   elements: z.array(ElementSchema).default([]),
   backgroundImage: ImageSchema.default(DEFAULT_BACKGROUND_IMAGE_INPUT),
   backgroundColor: z.string().optional(),
+  // Bipolar gradient: sign = direction (negative = from bottom, positive = from top),
+  // magnitude = % of slide height covered. 0 = off, ±100 = full slide.
+  // undefined = defaults to -45 when a background image is present, otherwise 0.
+  gradient: z.number().min(-100).max(100).optional(),
+  // Gradient color (hex). undefined = default black.
+  gradientColor: z.string().optional(),
 });
 
 export const UnstyledMultiSlideSchema = z.array(UnstyledSlideSchema);

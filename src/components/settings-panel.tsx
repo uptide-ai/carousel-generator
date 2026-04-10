@@ -55,7 +55,7 @@ const ALL_FORMS: Record<string, TabInfo> = {
     icon: Briefcase,
   },
   theme: {
-    name: "Theme",
+    name: "Layout",
     value: "theme",
     icon: Palette,
   },

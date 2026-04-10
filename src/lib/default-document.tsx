@@ -30,6 +30,7 @@ export const defaultValues = {
       secondary: "#161616",
       background: "#ffffff",
       padding: 30,
+      contentAlign: { horizontal: "Left" as const, vertical: "Center" as const },
     },
     fonts: {
       font1: "Anton",

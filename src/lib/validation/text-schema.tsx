@@ -6,7 +6,7 @@ export type TextALignType = z.infer<typeof TextALignType>;
 
 export const TextStyleSchema = z.object({
   fontSize: z.number().min(8).max(200).optional(), // px — undefined = computed from global font size
-  align: TextALignType.default(TextALignType.enum.Left),
+  align: TextALignType.optional(), // undefined = inherit from global theme.contentAlign.horizontal
   lineHeight: z.number().min(0.5).max(4).default(1.3),
   letterSpacing: z.number().min(-0.1).max(0.5).default(0),
   paragraphSpacing: z.number().min(0).max(3).default(0),

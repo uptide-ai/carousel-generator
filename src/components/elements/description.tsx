@@ -1,7 +1,6 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { fontIdToClassName } from "@/lib/fonts-map";
-import { textStyleToClasses } from "@/lib/text-style-to-classes";
 import { useFormContext } from "react-hook-form";
 import { TextAreaFormField } from "@/components/forms/fields/text-area-form-field";
 import {
@@ -26,6 +25,8 @@ export function Description({
     `${fieldName}.style` as StyleFieldPath
   ) as TextFieldStyle;
   const textFieldName = (fieldName + ".text") as TextTextFieldPath;
+  const effectiveAlign =
+    style.align ?? config.theme.contentAlign?.horizontal ?? "Left";
 
   return (
     <TextAreaFormField
@@ -35,12 +36,11 @@ export function Description({
       placeholder={"Your description here"}
       className={cn(
         ``,
-        textStyleToClasses({ style }),
         fontIdToClassName(config.fonts.font2),
         className
       )}
       style={{
-        color: style.color ?? config.theme.secondary,
+        color: style.color ?? config.fonts.font2Style?.color ?? config.theme.secondary,
         backgroundColor: style.backgroundColor ?? undefined,
         fontSize: `${style.fontSize ?? config.fonts.font2Style?.fontSize ?? 18}px`,
         fontWeight: config.fonts.font2Style?.fontWeight ?? 700,
@@ -48,6 +48,7 @@ export function Description({
         letterSpacing: `${config.fonts.font2Style?.letterSpacing ?? 0}em`,
         marginBottom: `${style.paragraphSpacing ?? 0}em`,
         textWrap: config.fonts.font2Style?.textBalance ? "balance" : undefined,
+        textAlign: effectiveAlign.toLowerCase() as "left" | "center" | "right",
       }}
     />
   );

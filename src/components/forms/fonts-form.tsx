@@ -24,7 +24,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { Check, ChevronsUpDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { fontsMap } from "@/lib/fonts-map";
 import { DocumentFormReturn } from "@/lib/document-form-types";
@@ -34,6 +34,52 @@ import { Checkbox } from "@/components/ui/checkbox";
 import {
   FormControl,
 } from "@/components/ui/form";
+
+function InlineColorPicker({
+  label,
+  value,
+  defaultColor,
+  onChange,
+  onReset,
+}: {
+  label: string;
+  value: string | undefined;
+  defaultColor: string;
+  onChange: (color: string) => void;
+  onReset: () => void;
+}) {
+  const displayColor = value || defaultColor;
+  return (
+    <div className="flex flex-col gap-2 w-full">
+      <span className="text-sm font-medium">{label}</span>
+      <div className="flex items-center gap-2">
+        <input
+          type="color"
+          value={displayColor}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-8 h-8 rounded cursor-pointer border-0 p-0 flex-shrink-0"
+        />
+        <input
+          type="text"
+          value={value || ""}
+          placeholder={defaultColor}
+          onChange={(e) => onChange(e.target.value || defaultColor)}
+          className="flex-1 min-w-0 text-xs px-2 py-1 border rounded bg-background"
+        />
+        {value && (
+          <button
+            type="button"
+            className="flex items-center text-muted-foreground hover:text-foreground flex-shrink-0"
+            onClick={onReset}
+            title="Reset"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
 
 const fontEntries = Object.entries(fontsMap).map(([id, info]) => ({
   id,
@@ -117,8 +163,20 @@ function FontStyleFields({
   form: DocumentFormReturn;
   prefix: "config.fonts.font1Style" | "config.fonts.font2Style";
 }) {
+  const color = form.watch(`${prefix}.color` as any) as string | undefined;
+  const defaultColor =
+    prefix === "config.fonts.font1Style"
+      ? form.watch("config.theme.primary")
+      : form.watch("config.theme.secondary");
   return (
     <div className="flex flex-col gap-4">
+      <InlineColorPicker
+        label="Color"
+        value={color}
+        defaultColor={defaultColor}
+        onChange={(c) => form.setValue(`${prefix}.color` as any, c)}
+        onReset={() => form.setValue(`${prefix}.color` as any, undefined)}
+      />
       <SliderInputField
         fieldName={`${prefix}.fontSize`}
         form={form}

@@ -10,16 +10,9 @@ export function textStyleToClasses({
   style: z.infer<typeof TextStyleSchema>;
 }): string {
   const { align } = style;
-  const classes = [];
-
-  classes.push(
-    align == TextALignType.enum.Left
-      ? "text-left"
-      : align == TextALignType.enum.Center
-      ? "text-center"
-      : align == TextALignType.enum.Right
-      ? "text-right"
-      : ""
-  );
-  return classes.join(" ");
+  if (!align) return "";
+  if (align === TextALignType.enum.Left) return "text-left";
+  if (align === TextALignType.enum.Center) return "text-center";
+  if (align === TextALignType.enum.Right) return "text-right";
+  return "";
 }

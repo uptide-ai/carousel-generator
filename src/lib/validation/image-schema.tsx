@@ -70,6 +70,6 @@ export const DEFAULT_IMAGE_INPUT: z.infer<typeof ImageSchema> =
 export const DEFAULT_BACKGROUND_IMAGE_INPUT: z.infer<typeof ImageSchema> =
   ImageSchema.parse({
     style: {
-      opacity: 30,
+      opacity: 100,
     },
   });

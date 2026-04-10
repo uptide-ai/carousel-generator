@@ -27,10 +27,10 @@ src/
   components/
     editor.tsx            # Main layout: sidebar + slides area
     slides-editor.tsx     # Grid view of all slides (no AI panel — moved to sidebar)
-    settings-panel.tsx    # Left sidebar with vertical tabs (Settings/Theme/Fonts/AI/File)
-    style-menu.tsx        # Appears when element selected (fontSize, textColor, bgColor, align, bottomSpacing, objectFit, image)
+    settings-panel.tsx    # Left sidebar with vertical tabs (Settings/Layout/Fonts/AI/File)
+    style-menu.tsx        # Appears when an element OR a slide is selected. For elements: fontSize, textColor, bgColor, align (with reset X), paragraphSpacing, objectFit (Fill hidden), image. For slides (detected by `currentSelection` ending in `.backgroundImage`): Image source/opacity + Gradient slider + Background Color picker.
     main-nav.tsx          # Top bar: Pager + download popover (PDF or Images ZIP)
-    slide-menubar.tsx     # Per-slide actions: move, clone, delete, per-slide background color
+    slide-menubar.tsx     # Per-slide actions: move, clone, export PNG, delete (bg color moved to slide Style panel)
     element-menubar-wrapper.tsx  # Per-element actions: move, clone, delete, change type
     ai-panel.tsx          # "Generate with AI" section (lives in sidebar AI tab)
     ai-textarea-form.tsx  # AI text paste + format button (sidebar-width layout)
@@ -56,10 +56,10 @@ src/
       background-image-layer.tsx  # Background image overlay
       page-number.tsx     # Slide number display
     forms/
-      brand-form.tsx      # Brand config: show toggle + name, handle, avatar image (inside Settings tab)
-      theme-form.tsx      # Palette picker or custom hex colors
+      brand-form.tsx      # Settings tab content (single form): Show brand → Show page numbers → Template → Name → Handle → Avatar. Includes both brand and pageNumber fields despite the name.
+      theme-form.tsx      # Layout tab: custom color checkbox, palette/custom colors, horizontal + vertical content alignment (3×3 buttons), Slide Padding slider
       fonts-form.tsx      # Font1 (titles) + Font2 (body) selectors with searchable combobox + per-font style controls
-      page-number-form.tsx  # Show/hide page numbers toggle (inside Settings tab)
+      page-number-form.tsx  # Legacy: page number toggle was merged into brand-form.tsx, file kept but unused
       file-form.tsx       # File tab: export/import settings & content, reset
       fields/
         slider-input-field.tsx  # Reusable slider + number input combo (local state allows typing intermediate values, commits on blur)
@@ -68,14 +68,14 @@ src/
   lib/
     validation/
       document-schema.tsx   # Root: { slides, config, filename }
-      slide-schema.tsx      # CommonSlideSchema: { elements[], backgroundImage }
+      slide-schema.tsx      # CommonSlideSchema: { elements[], backgroundImage, backgroundColor?, gradient? }
       element-type.tsx      # ElementType enum + discriminated union
       text-schema.tsx       # Title/Subtitle/Description schemas + TextStyleSchema
       image-schema.tsx      # Image/ContentImage schemas + ImageStyleSchema
       xtwitter-schema.tsx   # XTwitterSchema: { type } only — reads brand data at render time
-      theme-schema.tsx      # ThemeSchema: primary/secondary/background hex + palette + padding
+      theme-schema.tsx      # ThemeSchema: primary/secondary/background hex + palette + padding + contentAlign (horizontal/vertical)
       brand-schema.tsx      # BrandSchema: name, handle, avatar, template (FooterFull/FooterHandle/Tweet)
-      fonts-schema.tsx      # FontsSchema: font1, font2, font1Style, font2Style (fontSize, lineHeight, letterSpacing, fontWeight, textBalance)
+      fonts-schema.tsx      # FontsSchema: font1, font2, font1Style, font2Style (fontSize, lineHeight, letterSpacing, fontWeight, textBalance, color?)
       page-number-schema.tsx  # PageNumberSchema: showNumbers boolean
     providers/
       document-provider.tsx   # Root provider: form + all contexts + localStorage persistence
@@ -117,7 +117,7 @@ Document
 ├── filename: string
 ├── config
 │   ├── brand: { showBrand, template, name, handle, avatar: ImageSchema }
-│   ├── theme: { primary, secondary, background (hex), isCustom, pallette, padding }
+│   ├── theme: { primary, secondary, background (hex), isCustom, pallette, padding, contentAlign: { horizontal, vertical } }
 │   ├── fonts: { font1, font2, font1Style, font2Style }
 │   └── pageNumber: { showNumbers }
 └── slides: CommonSlideSchema[]
@@ -127,21 +127,25 @@ Document
     │   ├── source: { src, type } (for image elements)
     │   └── style: TextStyleSchema | ContentImageStyleSchema (absent for XTwitter — it reads from config.brand)
     ├── backgroundImage: ImageSchema
-    └── backgroundColor: string (optional, per-slide override of theme background)
+    ├── backgroundColor: string (optional, per-slide override of theme background)
+    ├── gradient: number (optional, -100 to 100 — bipolar: negative = from bottom, positive = from top, magnitude = % coverage. Defaults to -45 only when a background image is present, otherwise 0)
+    └── gradientColor: string (optional hex — gradient fade color, defaults to #000000 when unset)
 ```
 
 **Element types**: Title, Subtitle, Description, ContentImage, Image, XTwitter
-**Text style** (per-element override): fontSize (8-200px, optional — if unset computed from global), align (Left/Center/Right), paragraphSpacing/bottomSpacing (0-3em), color (optional hex — overrides theme primary/secondary), backgroundColor (optional hex — highlight behind text)
-**Font style** (global per-font in config.fonts): fontSize (8-200px, default font1=38, font2=20), lineHeight (0.5-4), letterSpacing (-0.1 to 0.5em), fontWeight (100-900), textBalance (boolean → `text-wrap: balance`)
+**Text style** (per-element override): fontSize (8-200px, optional — if unset computed from global), align (Left/Center/Right, **optional** — if unset inherits from global `theme.contentAlign.horizontal`), paragraphSpacing/bottomSpacing (0-3em), color (optional hex — overrides theme primary/secondary), backgroundColor (optional hex — highlight behind text)
+**Font style** (global per-font in config.fonts): fontSize (8-200px, default font1=38, font2=20), lineHeight (0.5-4), letterSpacing (-0.1 to 0.5em), fontWeight (100-900), textBalance (boolean → `text-wrap: balance`), color (optional hex — default for title/subtitle/description using that font, falls back to theme primary/secondary). Color resolution chain for text elements: `style.color` (per-element) → `config.fonts.fontNStyle.color` (per-font) → `theme.primary` (title) / `theme.secondary` (subtitle/description). Color pickers live in the **Fonts** tab.
 **Font size proportional scaling**: Title uses global font1 fontSize directly. Subtitle uses font1 fontSize × 0.65. Description uses global font2 fontSize. Per-element fontSize override takes priority over global.
 **Slide padding**: configurable via `config.theme.padding` (0-80px, default 30px) — controls inner padding of all slides
+**Content alignment (global)**: `config.theme.contentAlign` has `horizontal` (Left/Center/Right) and `vertical` (Top/Center/Bottom). Vertical is applied on `PageLayout` via `justify-*`. Horizontal is applied as an **inline `textAlign` style directly on each Title/Subtitle/Description element**, computed as `style.align ?? config.theme.contentAlign.horizontal ?? "Left"`. We do NOT rely on CSS inheritance here because old localStorage docs had `align: "Left"` persisted as an explicit override from a previous schema default, which blocked inheritance on title/subtitle — applying the effective value inline bypasses that stale override only when the user hasn't explicitly set one. Per-element `style.align` still wins when set; the X reset button in StyleMenu clears it to `undefined`. Configured in the **Layout** tab (formerly Theme), and alignment + Slide Padding are placed BEFORE the palette/custom colors section. When `firstIsExpand` is true, vertical is forced to Top to keep the expand image flush with the top edge. Vertical Alignment selector uses lucide's `AlignStartHorizontal`/`AlignCenterHorizontal`/`AlignEndHorizontal` icons because those visually show top/middle/bottom stacking (lucide's `*Vertical` icons show left/center/right instead — confusing).
 **Image style**: opacity (0-100), objectFit (Contain/Cover/Expand/Fill), height (50-500px, optional)
   - Contain: image fits inside element; if height set, uses fixed height
   - Cover: image fills element with crop; if height set, uses fixed height
   - Expand: image goes edge-to-edge horizontally (escapes PageFrame padding via negative margins on wrapper); if first/last element, also removes top/bottom padding; uses minHeight so it can grow to fill remaining space when last element; if last element, footer is hidden and grid collapses to single row
-  - Fill: image becomes full-slide background layer (rendered via ContentImageFillLayer at PageBase level)
+  - Fill: **hidden from the UI** (button commented out in `style-menu.tsx`) — full-slide images are configured via the slide Style panel (click on a slide → edits `slide.backgroundImage`). `ContentImageFillLayer` rendering path is preserved for backwards compat with any pre-existing docs that still have Fill set.
   - Height slider appears in style menu for ContentImage (except Fill mode), default 200px
-**Per-slide background color**: optional `backgroundColor` field on each slide, overrides global `config.theme.background`. Color picker dot in slide menubar (between arrows) with hex input and "Reset to global" option.
+**Per-slide background color**: optional `backgroundColor` field on each slide, overrides global `config.theme.background`. Edited in the **slide Style panel** (click the slide body — it selects `slides.X.backgroundImage` and StyleMenu shows slide-level extras: Gradient + Background Color). No longer a dot in the slide menubar.
+**Slide gradient**: optional **bipolar** `gradient: number` (-100 to 100) on each slide. Sign = direction (negative = fades in from bottom, positive = fades in from top), magnitude = % of slide height covered. `0` = off, `±100` = full-slide fade. Defaults to **-45 when a background image is present**, otherwise **0** (off), so slides without an image stay clean but any slide with a background image automatically gets a readable dark bottom fade until the user adjusts it. Renders as an absolutely positioned overlay layer at `-z-[5]` (above background image, below content). For negative values: `linear-gradient(to bottom, transparent ${100-|v|}%, gradientColor 100%)`. For positive values: `linear-gradient(to top, transparent ${100-v}%, gradientColor 100%)`. The gradient color comes from optional `gradientColor: string` (hex), defaulting to `#000000` when unset. Edited in the slide Style panel via slider (-100 to 100) + number input and a color picker. The slider's visual default also flips (0 with no image, -45 with image) via a `form.watch` on the slide's `backgroundImage.source.src`, so uploading an image makes the default appear live without re-selecting the slide.
 **Brand**: showBrand toggle controls global brand visibility. `template` selects one of:
   - **FooterHandle** (default): only `@handle` centered in footer, page number absolute-right. Rendered as an **absolutely positioned sibling of `PageFrame` inside `PageBase`** (`bottom-4`, with horizontal padding matching `config.theme.padding`) so it does NOT take space in the `1fr auto` grid. When this template is active, `PageFrame`'s grid collapses to `1fr` and content stays fully centered regardless of the footer's vertical offset.
   - **FooterFull**: avatar + name + handle signature in footer (left), page number right. Rendered inside the grid `auto` row as normal.
@@ -171,13 +175,14 @@ All state lives in a single React Hook Form instance (`useForm` with `zodResolve
 - **Export modes**: Download button opens popover with PDF (jsPDF) or Images ZIP (JSZip) options. Both use html-to-image canvas pipeline. Image proxy (api/proxy) handles CORS; falls back to window.location.origin if NEXT_PUBLIC_APP_URL not set.
 - **Quick-add (no dialogs)**: "+" for new slide directly creates a Content slide (no type picker dialog). "+" for new element directly adds a Description element (no type picker dialog). Dialog components are commented out but preserved for future use (`new-page-dialog-content.tsx`, `new-element-dialog-content.tsx`). Users change element type after creation via the element menubar's swap button.
 - **Keyboard navigation**: Arrow keys navigate between slides via a `window` keydown listener in `document.tsx`. Listener skips navigation when focus is on a `textarea`, `input`, or `contentEditable` element, allowing normal text cursor movement.
+- **Sticky selection (no click-outside deselect)**: Clicking the empty area around slides does **not** deselect the current element/slide. Selection only changes proactively — by clicking another element, another slide, or a sidebar tab (the tab triggers have `onFocus={() => setCurrentSelection("", null)}` which swaps `StyleMenu` back for the tab's form). Rationale: users committing slider/number values by clicking outside the slide were losing their Style panel to the Settings tab mid-edit, which felt abrupt. Keeping the selection makes the Style panel behave like a sticky inspector.
 - **2-row grid layout**: Desktop shows all slides in a CSS Grid with `ceil(numSlides/2)` columns and 2 rows. Scale is computed to fit the available width (window - sidebar - padding). Mobile falls back to a single-row horizontal scroll. The grid container (`docReference`) wraps only slides — "add slide" button is outside for clean PDF export.
 - **No drag scroll**: Embla carousel was replaced with CSS Grid. Slides don't scroll on drag/click — only explicit navigation (arrow keys, pager) changes the active slide.
 - **Per-element color overrides**: Text elements (Title/Subtitle/Description) support optional `color` and `backgroundColor` in their style. Color pickers appear in the StyleMenu when a text element is selected. Reset buttons revert to theme defaults.
 - **Slide vertical layout**: `PageFrame` uses CSS Grid (`grid-template-rows: 1fr auto`) with 3 children: (1) `PageLayout` in the `1fr` row centers elements with `justify-center`, (2) a wrapper div in the `auto` row holds both `AddElement` button and `Footer`. This ensures the "+" button doesn't affect vertical centering of content elements.
 - **Reset all**: Settings tab has a "Reset all" button that calls `form.reset(defaultValues)` + `localStorage.removeItem("documentFormKey")` to start fresh.
 - **Inline markdown in text fields**: Title/Subtitle/Description support `*bold*` and `_italic_` via a minimal parser in `inline-markdown.ts`. `TextAreaFormField` toggles between an editable `<textarea>` (showing raw markdown source) when focused and a `<div>` with `dangerouslySetInnerHTML` (rendered HTML) when blurred. Regex requires non-whitespace on both sides of the delimiters (`*foo*`, not `* foo *`) to avoid matching literal asterisks in text like `5 * 3`. Escapes: `\*` and `\_` produce literal `*` / `_` — they are swapped out to private-use Unicode placeholders (`\uE000`, `\uE001`) before the markdown regex runs, then restored as literals in the output. `hasInlineMarkdown` returns true whenever an escape is present so the rendered div is shown (the backslashes must be stripped for display). Input is HTML-escaped before applying markdown so the output is safe.
-- **Title/Subtitle descender clipping**: Title and Subtitle elements apply `clipPath: "inset(0 0 0.2em 0)"` and compensate with `marginBottom: calc(... - 0.2em)` to trim ugly descender/line-gap space at the bottom of display fonts. `PageBase` uses `overflowClipMarginTop: "40px"` (per-side longhand) so the element menubar (positioned at `-top-9` on the first element) can still escape the slide's top edge without letting images or other content bleed out the bottom/sides.
+- **Title/Subtitle descender clipping**: Title and Subtitle elements apply `clipPath: "inset(0 0 0.2em 0)"` and compensate with `marginBottom: calc(... - 0.2em)` to trim ugly descender/line-gap space at the bottom of display fonts. `PageBase` uses `overflowClipMargin: "200px"` (shorthand, all sides) so the element menubar (positioned at `-top-9` on the first element) AND its change-type dropdown (opens downward from the last element) are never clipped by the slide edges. Images/backgrounds are already constrained to the slide via absolute layers, so nothing else leaks visually despite the relaxed clip margin.
 
 ## AI Formatting (Format with AI)
 
