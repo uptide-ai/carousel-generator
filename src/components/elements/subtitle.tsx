@@ -45,9 +45,8 @@ export function Subtitle({
         fontWeight: config.fonts.font1Style?.fontWeight ?? 700,
         lineHeight: config.fonts.font1Style?.lineHeight ?? 1.3,
         letterSpacing: `${config.fonts.font1Style?.letterSpacing ?? 0}em`,
-        marginBottom: `calc(${style.paragraphSpacing ?? 0}em - 0.2em)`,
+        marginBottom: `${style.paragraphSpacing ?? 0}em`,
         textWrap: config.fonts.font1Style?.textBalance ? "balance" : undefined,
-        clipPath: "inset(0 0 0.2em 0)",
         textAlign: effectiveAlign.toLowerCase() as "left" | "center" | "right",
       } as React.CSSProperties}
     />
