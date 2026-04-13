@@ -22,6 +22,7 @@ import { LoadingSpinner } from "@/components/loading-spinner";
 import { Textarea } from "@/components/ui/textarea";
 import { generateCarouselSlidesAction } from "@/app/actions";
 import { usePagerContext } from "@/lib/providers/pager-context";
+import { useHistoryContext } from "@/lib/providers/history-context";
 import { MultiSlideSchema } from "@/lib/validation/slide-schema";
 
 const FormSchema = z.object({
@@ -38,6 +39,7 @@ const SLIDES_PER_GROUP = 3; // navigate every N slides
 export function AITextAreaForm({ modelId }: { modelId: string }) {
   const { setValue }: DocumentFormReturn = useFormContext();
   const { setCurrentPage, scrollToPage } = usePagerContext();
+  const { snapshot } = useHistoryContext();
   const [isLoading, setIsLoading] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const cancelRef = useRef(false);
@@ -124,6 +126,7 @@ export function AITextAreaForm({ modelId }: { modelId: string }) {
     const generatedSlides = await generateCarouselSlidesAction(data.prompt, modelId);
 
     if (generatedSlides) {
+      snapshot();
       setIsLoading(false);
       setIsAnimating(true);
       await animateSlides(generatedSlides);
@@ -154,7 +157,7 @@ export function AITextAreaForm({ modelId }: { modelId: string }) {
               <FormControl>
                 <div className="flex flex-col gap-2 w-full">
                   <Textarea
-                    placeholder="Cole seu texto aqui para organizar em slides..."
+                    placeholder="Paste your text here to organize into slides..."
                     className="w-full overflow-y-auto min-h-[200px]"
                     {...field}
                   />

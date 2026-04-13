@@ -1,6 +1,7 @@
 import { DocumentSchema } from "@/lib/validation/document-schema";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { ZodType, z } from "zod";
+import { toast } from "@/components/ui/use-toast";
 
 export function useRetrieveFormValues<T, DocumentSchema>(
   localStorageKey: string,
@@ -46,10 +47,25 @@ export const usePersistFormValues = ({
   localStorageKey: string;
   values: any;
 }) => {
+  const hasWarnedRef = useRef(false);
+
   useEffect(() => {
     const localStorage =
       typeof window !== "undefined" ? window.localStorage : undefined;
-    localStorage?.setItem(localStorageKey, JSON.stringify(values));
+    try {
+      localStorage?.setItem(localStorageKey, JSON.stringify(values));
+      hasWarnedRef.current = false;
+    } catch (e) {
+      if (!hasWarnedRef.current) {
+        hasWarnedRef.current = true;
+        toast({
+          title: "Storage full",
+          description:
+            "Your changes may not be saved. Try removing some images or export your work.",
+          variant: "destructive",
+        });
+      }
+    }
   }, [values, localStorageKey]);
 
   return;

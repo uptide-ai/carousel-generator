@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { getSlideNumber } from "@/lib/field-path";
 import { SIZE } from "@/lib/page-size";
 import { toPng } from "html-to-image";
+import { useHistoryContext } from "@/lib/providers/history-context";
 import React, { useState } from "react";
 
 export default function SlideMenubar({
@@ -39,6 +40,7 @@ export default function SlideMenubar({
   const filename = watch("filename");
   const currentPage = getSlideNumber(fieldName);
   const { remove, swap, insert } = slidesFieldArray;
+  const { snapshot } = useHistoryContext();
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExportSlide = async () => {
@@ -78,6 +80,7 @@ export default function SlideMenubar({
     >
       <Button
         onClick={() => {
+          snapshot();
           swap(currentPage, currentPage - 1);
           setCurrentPage(currentPage - 1);
         }}
@@ -90,10 +93,7 @@ export default function SlideMenubar({
       </Button>
       <Button
         onClick={() => {
-          console.log({
-            currentPage,
-            pageValue: currentSlidesValues[currentPage],
-          });
+          snapshot();
           const insertPosition = currentPage;
           const values = JSON.parse(
             JSON.stringify(currentSlidesValues[insertPosition])
@@ -121,6 +121,7 @@ export default function SlideMenubar({
       </Button>
       <Button
         onClick={() => {
+          snapshot();
           remove(currentPage);
           if (currentPage > 0) {
             // setNumPages(numPages - 1);
@@ -140,6 +141,7 @@ export default function SlideMenubar({
       </Button>
       <Button
         onClick={() => {
+          snapshot();
           swap(currentPage, currentPage + 1);
           setCurrentPage(currentPage + 1);
         }}

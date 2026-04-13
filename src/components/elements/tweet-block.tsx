@@ -66,7 +66,7 @@ export function TweetBlock({
           />
         ) : null}
       </div>
-      <div className="flex flex-col min-w-0 flex-1 leading-tight">
+      <div className="flex flex-col min-w-0 flex-1 leading-tight -space-y-0.5">
         {nameSlot ?? (
           <p
             className={cn(
