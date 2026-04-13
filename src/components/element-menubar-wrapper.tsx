@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { useFieldArray } from "react-hook-form";
 import { getParent, getElementNumber } from "@/lib/field-path";
 import { useSelectionContext } from "@/lib/providers/selection-context";
+import { useHistoryContext } from "@/lib/providers/history-context";
 import React, { useState, useRef, useEffect } from "react";
 import { ElementType } from "@/lib/validation/element-type";
 import { TitleSchema, SubtitleSchema, DescriptionSchema } from "@/lib/validation/text-schema";
@@ -121,12 +122,14 @@ function ElementMenubar({
     name: getParent(fieldName),
   });
   const { setCurrentSelection } = useSelectionContext();
+  const { snapshot } = useHistoryContext();
   const currentElementNumber = getElementNumber(fieldName);
   const parentPath = getParent(fieldName);
   const currentElementValue = watch(fieldName);
   const currentType = currentElementValue?.type;
 
   const handleChangeType = (newType: string) => {
+    snapshot();
     const newElement = getDefaultForType(newType);
     if (currentElementValue && "text" in currentElementValue && currentElementValue.text && "text" in newElement) {
       (newElement as any).text = currentElementValue.text;
@@ -143,6 +146,7 @@ function ElementMenubar({
     >
       <button
         onClick={() => {
+          snapshot();
           swap(currentElementNumber, currentElementNumber - 1);
           setCurrentSelection(`${parentPath}.${currentElementNumber - 1}` as ElementFieldPath, null);
         }}
@@ -153,6 +157,7 @@ function ElementMenubar({
       </button>
       <button
         onClick={() => {
+          snapshot();
           const insertPosition = currentElementNumber;
           const values = JSON.parse(JSON.stringify(currentElementValue));
           insert(insertPosition, values);
@@ -163,7 +168,10 @@ function ElementMenubar({
         <Copy className="w-4 h-4 text-muted-foreground" />
       </button>
       <button
-        onClick={() => remove(currentElementNumber)}
+        onClick={() => {
+          snapshot();
+          remove(currentElementNumber);
+        }}
         disabled={currentElementNumber == 0 && numElements == 0}
         className="inline-flex items-center justify-center w-6 h-6 disabled:pointer-events-none disabled:opacity-50"
       >
@@ -175,6 +183,7 @@ function ElementMenubar({
       />
       <button
         onClick={() => {
+          snapshot();
           swap(currentElementNumber, currentElementNumber + 1);
           setCurrentSelection(`${parentPath}.${currentElementNumber + 1}` as ElementFieldPath, null);
         }}
