@@ -70,12 +70,12 @@ export function TweetBlock({
         {nameSlot ?? (
           <p
             className={cn(
-              "text-base font-bold truncate flex flex-row items-center gap-1",
+              "text-base font-bold flex flex-row items-center gap-1",
               fontClass
             )}
             style={{ color: config.theme.primary }}
           >
-            <span className="truncate">{name}</span>
+            <span className="truncate min-w-0">{name}</span>
             <VerifiedBadge className="w-4 h-4 flex-shrink-0" />
           </p>
         )}

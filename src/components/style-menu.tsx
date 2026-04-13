@@ -272,7 +272,7 @@ export function StyleMenu({
         ) : null}
         {style && Object.hasOwn(style, "objectFit") ? (
           <EnumRadioGroupField
-            name={"Object Fit"}
+            name={"Image Fit"}
             form={form}
             fieldName={`${stylePath}.objectFit` as ImageStyleObjectFitFieldPath}
             enumValueElements={objectFitMap as Record<ObjectFitType, React.ReactElement>}

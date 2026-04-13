@@ -6,6 +6,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { FileInputButton } from "@/components/ui/file-input-button";
 import { convertFileToDataUrl } from "@/lib/convert-file";
 import {
   DocumentFormReturn,
@@ -78,9 +79,8 @@ export function ImageSourceFormField({
               <FormItem>
                 <FormLabel>{""}</FormLabel>
                 <FormControl>
-                  <Input
+                  <FileInputButton
                     accept=".jpg, .jpeg, .png, .svg, .webp"
-                    type="file"
                     onChange={async (e) => {
                       const file = e.target?.files ? e.target?.files[0] : null;
 

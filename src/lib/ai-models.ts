@@ -6,15 +6,15 @@ export type AIModel = {
 
 export const AI_MODELS: AIModel[] = [
   {
+    id: "anthropic/claude-haiku-4.5",
+    name: "Claude Haiku 4.5",
+  },
+  {
     id: "google/gemini-3-flash-preview",
     name: "Gemini 3 Flash",
     extraBody: {
       reasoning: { effort: "high" },
     },
-  },
-  {
-    id: "anthropic/claude-haiku-4.5",
-    name: "Claude Haiku 4.5",
   },
 ];
 
